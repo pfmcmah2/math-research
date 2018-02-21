@@ -1,0 +1,33 @@
+CSV files are named using the following format.
+#layers_resolution_valuerange_timerange.csv
+
+ex. 6_low_2-8_late.csv
+  represents a 6 layer hierarchy with spacing of .1, value range of .2-.8 run over the last 50 years.
+
+sigma = .3 for all
+
+#layers:
+  number of layers in the hierarchy.
+  ex. 2, 6
+
+
+resolution:
+  spacing between bias and homophily values
+  ex:
+    low = .1
+    med = .05
+    high = .01
+
+
+valuerange:
+  range of bias and homophily values same decimal notation as resolution but 1 => 1 NOT .1
+  given in the format start-end, assumes same range for bias and homophily
+  ex. 5-65
+
+
+timerange:
+  years over which standard deviation is taken
+  ex:
+    late = last 50 years
+    early = first 100 years
+    full = entire range
