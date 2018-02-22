@@ -8,13 +8,13 @@ import csv
 ### initialize variables ###
 num_layers = 6
 years = 500
-R = [1/4,1/5,1/6,1/7,1/9,1/15]   # Retirement rate at each level
+R = [1/4,1/5,1/6,1/7,1/9,1/15]    # Retirement rate at each level
 N = [13,8,5,3,2,1]   # Number of people at each level
 X = [0.4,0.3,0.2,0.1,0.05,0.01]   # Fraction of women at each level
 layer_names = ['undergrad','grad','postdoc','tenure track','tenured','full']
 
 b = .5      # Bias
-mu = .5     # Mean for gaussian homophily distribution
+mu = .65    # Mean for gaussian homophily distribution
 sigma = .3  # STD for gaussian homophily distribution
 
 Normal = []
@@ -72,7 +72,7 @@ def intode(RR, rr, XX, t):
 ### Store values in out[mu index][bias index]
 out = []
 std_sum = 0
-for i in range(0, 6):   ## range of gaussian
+for i in range(0, 16):   ## range of gaussian
     ### create gaussian for this mu
     Normal = (np.zeros(1000, dtype = np.float64))   # gaussian DP
     for j in range(0, 1000):
@@ -81,20 +81,20 @@ for i in range(0, 6):   ## range of gaussian
     out.append([])      ## create subarray for this mu
     b = .5              ## set bias
 
-    for j in range(0, 6):   ## range of bias
+    for j in range(0, 16):   ## range of bias
         std_sum = 0
         test = intode(R, r, X, years)   ## run simulation, store values in test
         for j in range(num_layers):     ## sum std of all layers
             std_sum += np.std(test[j])
         out[i].append(std_sum)
-        b += .1
-    mu += .1
+        b += .01
+    mu += .01
 
 
 
 ### Write to csv
 myData = np.array(out)
-myFile = open('6_low_0-1_late.csv', 'w')
+myFile = open('6_hig_50-56_65-80_late.csv', 'w')
 with myFile:
    writer = csv.writer(myFile)
    writer.writerows(myData)

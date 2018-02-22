@@ -4,16 +4,16 @@ import math
 import scipy.stats
 import csv
 
-with open('6_low_0-1_late.csv', newline='') as myFile:
+with open('6_hig_50-65_65-80_late.csv', newline='') as myFile:
     reader = csv.reader(myFile)
     reader = list(reader)
-    for i in range(6):
-        for j in range(6):
+    for i in range(16):
+        for j in range(16):
             reader[i][j] = float(reader[i][j])
     print(reader)
 
-    x = np.arange(.5, 1.1, .1)
-    y = np.arange(.5, 1.1, .1)
+    x = np.arange(.5, .66, .01)
+    y = np.arange(.65, .81, .01)
     x, y = np.meshgrid(x, y)
 
 
