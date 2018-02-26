@@ -4,7 +4,7 @@ import math
 import scipy.stats
 import csv
 
-name_string = '6_050_50-1*_50-1*_late.csv'
+name_string = '6_100_00-1*_50-1*_late.csv'
 directory = 'avg/'
 
 res = int(name_string[2:5])
@@ -38,13 +38,16 @@ print(y_high)
 x_size = int((x_high - x_low)/res)
 y_size = int((y_high - y_low)/res)
 
+print(x_size)
+print(y_size)
+
 
 
 with open(directory + name_string, newline='') as myFile:
     reader = csv.reader(myFile)
     reader = list(reader)
-    for i in range(x_size):
-        for j in range(y_size):
+    for i in range(y_size):
+        for j in range(x_size):
             reader[i][j] = float(reader[i][j])
     print(reader)
 
@@ -56,5 +59,6 @@ with open(directory + name_string, newline='') as myFile:
     plt.pcolormesh(x, y, reader)
     plt.xlabel("Bias")
     plt.ylabel("Homophily")
+    plt.ylim([.5,1])
     plt.colorbar() #need a colorbar to show the intensity scale
     plt.show() #boom

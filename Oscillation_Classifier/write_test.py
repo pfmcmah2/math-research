@@ -6,11 +6,11 @@ import csv
 
 ### Settings Determines name of file ###
 num_layers = 6
-res = .05
-b_start = .5
+res = .1
+b_start = 0
 b_end = 1
 h_start = .5
-h_end = 1
+h_end = 1.
 time_range = 'late'
 #directory = 'std/'
 
@@ -20,6 +20,7 @@ years = 500
 R = [1/4,1/5,1/6,1/7,1/9,1/15]    # Retirement rate at each level
 N = [13,8,5,3,2,1]   # Number of people at each level
 X = [0.4,0.3,0.2,0.1,0.05,0.01]   # Fraction of women at each level
+#X = [0.6,0.7,0.8,0.9,0.95,0.99]
 layer_names = ['undergrad','grad','postdoc','tenure track','tenured','full']
 
 b = b_start      # Bias
@@ -36,7 +37,10 @@ else:
         file_string += '0' + str(int(res * 1000))
     else:
         file_string += '00' + str(int(res * 1000))
-file_string += '_' + str(int(b_start * 100)) + '-'
+if(b_start == 0):
+    file_string += '_00-'
+else:
+    file_string += '_' + str(int(b_start * 100)) + '-'
 if(b_end == 1):
     file_string += '1*'
 else:
@@ -112,8 +116,8 @@ out = []
 avg = []
 std_sum = 0
 
-b_range = int((b_end - b_start + res)/res)
-h_range = int((h_end - h_start + res)/res)
+b_range = int(round((b_end - b_start + res)/res))
+h_range = int(round((h_end - h_start + res)/res))
 print(b_range)
 print(h_range)
 
