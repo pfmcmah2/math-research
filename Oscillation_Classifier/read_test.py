@@ -4,25 +4,21 @@ import math
 import scipy.stats
 import csv
 
-name_string = '2_med_50-1__50-1__full.csv'
+name_string = '6_050_50-1*_50-1*_late.csv'
+directory = 'avg/'
 
-res = name_string[2:5]
-if(res == 'low'):
-    res = .1
-if(res =='med'):
-    res = .05
-if(res =='hig'):
-    res = .01
+res = int(name_string[2:5])
+res = float(res/1000)
 
 print(res)
 
 x_low  = int(name_string[6:8])
-if(name_string[10] == '_'):
+if(name_string[10] == '*'):
     x_high = 100
 else:
     x_high = int(name_string[9:11])
 y_low  = int(name_string[12:14])
-if(name_string[16] == '_'):
+if(name_string[16] == '*'):
     y_high = 100
 else:
     y_high = int(name_string[15:17])
@@ -39,16 +35,16 @@ print(x_high)
 print(y_low)
 print(y_high)
 
-size = int((x_high - x_low)/res)
-print(size)
+x_size = int((x_high - x_low)/res)
+y_size = int((y_high - y_low)/res)
 
 
 
-with open(name_string, newline='') as myFile:
+with open(directory + name_string, newline='') as myFile:
     reader = csv.reader(myFile)
     reader = list(reader)
-    for i in range(size):
-        for j in range(size):
+    for i in range(x_size):
+        for j in range(y_size):
             reader[i][j] = float(reader[i][j])
     print(reader)
 

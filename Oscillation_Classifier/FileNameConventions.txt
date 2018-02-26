@@ -12,11 +12,11 @@ sigma = .3 for all
 
 
 resolution:
-  spacing between bias and homophily values
+  spacing between bias and homophily values 3 decimal places
   ex:
-    low = .1
-    med = .05
-    hig = .01
+    100 = .1
+    050 = .05
+    005 = .005
 
 
 valuerange:

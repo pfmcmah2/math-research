@@ -4,20 +4,57 @@ import math
 import scipy.stats
 import csv
 
+### Settings Determines name of file ###
+num_layers = 6
+res = .05
+b_start = .5
+b_end = 1
+h_start = .5
+h_end = 1
+time_range = 'late'
+#directory = 'std/'
+
 
 ### initialize variables ###
-num_layers = 6
 years = 500
 R = [1/4,1/5,1/6,1/7,1/9,1/15]    # Retirement rate at each level
 N = [13,8,5,3,2,1]   # Number of people at each level
 X = [0.4,0.3,0.2,0.1,0.05,0.01]   # Fraction of women at each level
 layer_names = ['undergrad','grad','postdoc','tenure track','tenured','full']
 
-b = .5      # Bias
-mu = .5    # Mean for gaussian homophily distribution
+b = b_start      # Bias
+mu = h_start     # Mean for gaussian homophily distribution
 sigma = .3  # STD for gaussian homophily distribution
 
 L = num_layers - 1
+
+file_string = str(num_layers) + '_'
+if(res >= .1):
+    file_string += str(int(res * 1000))
+else:
+    if(res >= .01):
+        file_string += '0' + str(int(res * 1000))
+    else:
+        file_string += '00' + str(int(res * 1000))
+file_string += '_' + str(int(b_start * 100)) + '-'
+if(b_end == 1):
+    file_string += '1*'
+else:
+    file_string += str(int(b_end * 100))
+file_string += '_' + str(int(h_start * 100)) + '-'
+if(h_end == 1):
+    file_string += '1*'
+else:
+    file_string += str(int(h_end * 100))
+file_string += '_' + time_range + '.csv'
+
+print(file_string)
+
+
+
+
+
+
 
 # initialize r, the ratio parameter
 r = np.zeros(num_layers, dtype = np.float64)
@@ -60,7 +97,7 @@ def intode(RR, rr, XX, t):
         out.append([])
 
     for i in range(t*100):
-        if(i % 100 == 0 and i > 45000):
+        if(i % 100 == 0 and (time_range == 'full' or (i > 45000 and time_range == 'late'))):
             for j in range(num_layers):
                 out[j].append(XX[j])
         XX += .01*dx(RR, rr, XX)
@@ -72,30 +109,46 @@ def intode(RR, rr, XX, t):
 ### in each hierarchy with varying bias and homophily
 ### Store values in out[mu index][bias index]
 out = []
+avg = []
 std_sum = 0
-for i in range(0, 6):   ## range of gaussian
+
+b_range = int((b_end - b_start + res)/res)
+h_range = int((h_end - h_start + res)/res)
+print(b_range)
+print(h_range)
+
+for i in range(0, h_range):   ## range of homophily
     ### create gaussian for this mu
     Normal = (np.zeros(1000, dtype = np.float64))   # gaussian DP
     for j in range(0, 1000):
             Normal[j] = scipy.stats.norm(mu, sigma).pdf(j/1000)
 
     out.append([])      ## create subarray for this mu
-    b = .5              ## set bias
+    avg.append([])
+    b = b_start              ## set bias
 
-    for j in range(0, 6):   ## range of bias
+    for j in range(0, b_range):   ## range of bias
         std_sum = 0
         test = intode(R, r, X, years)   ## run simulation, store values in test
         for j in range(num_layers):     ## sum std of all layers
             std_sum += np.std(test[j])
         out[i].append(std_sum)
-        b += .1
-    mu += .1
+        avg[i].append(np.mean(test[0]))
+        b += res
+    mu += res
+    print(i)
 
 
 
 ### Write to csv
 myData = np.array(out)
-myFile = open('6_hig_50-65_65-80_late.csv', 'w')
+myFile = open('std/' + file_string, 'w')
 with myFile:
    writer = csv.writer(myFile)
    writer.writerows(myData)
+
+myData = np.array(avg)
+myFile = open('avg/' + file_string, 'w')
+with myFile:
+    writer = csv.writer(myFile)
+    writer.writerows(myData)

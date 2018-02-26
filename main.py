@@ -16,7 +16,7 @@ X = [0.4,0.3,0.2,0.1,0.05,0.01]     # Fraction of women at each level (Initial C
 # Label for each layer
 layer_names = ['undergrad','grad','postdoc','tenure track','tenured','full']
 
-b = .5      # Bias, <.5 -> favors men, >.5 -> favors women
+b = .65      # Bias, <.5 -> favors men, >.5 -> favors women
 mu = .7     # Mean for gaussian homophily distribution
 sigma = .3  # STD for gaussian homophily distribution
 
