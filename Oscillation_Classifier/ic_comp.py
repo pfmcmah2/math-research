@@ -5,7 +5,6 @@ import scipy.stats
 import csv
 
 name_string = '6_010_35-65_65-85_late.csv'
-directory = 'avg/'
 
 res = int(name_string[2:5])
 res = float(res/1000)
@@ -43,22 +42,28 @@ print(y_size)
 
 
 
-with open(directory + name_string, newline='') as myFile:
+with open('avg/' + name_string, newline='') as myFile:
     reader = csv.reader(myFile)
     reader = list(reader)
     for i in range(y_size):
         for j in range(x_size):
             reader[i][j] = float(reader[i][j])
-    #print(reader)
 
-    x = np.arange(x_low, x_high, res)
-    y = np.arange(y_low, y_high, res)
-    x, y = np.meshgrid(x, y)
+with open('avg_ic/' + name_string, newline='') as myFile:
+    readeric = csv.reader(myFile)
+    readeric = list(readeric)
+    for i in range(y_size):
+        for j in range(x_size):
+            readeric[i][j] = abs(float(readeric[i][j]) - reader[i][j])
+
+x = np.arange(x_low, x_high, res)
+y = np.arange(y_low, y_high, res)
+x, y = np.meshgrid(x, y)
 
 
-    plt.pcolormesh(x, y, reader)
-    plt.xlabel("Bias")
-    plt.ylabel("Homophily")
-    plt.ylim([y_low,y_high-res])
-    plt.colorbar() #need a colorbar to show the intensity scale
-    plt.show() #boom
+plt.pcolormesh(x, y, readeric)
+plt.xlabel("Bias")
+plt.ylabel("Homophily")
+plt.ylim([y_low,y_high-res])
+plt.colorbar() #need a colorbar to show the intensity scale
+plt.show() #boom

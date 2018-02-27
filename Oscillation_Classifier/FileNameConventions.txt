@@ -1,3 +1,7 @@
+File Structure:
+Oscillation_Classifier
+  std - csv files for 
+
 CSV files are named using the following format.
 #layers_resolution_valuerange_timerange.csv
 

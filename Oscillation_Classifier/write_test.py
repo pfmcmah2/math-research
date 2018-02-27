@@ -6,11 +6,11 @@ import csv
 
 ### Settings Determines name of file ###
 num_layers = 6
-res = .1
-b_start = 0
-b_end = 1
-h_start = .5
-h_end = 1.
+res = .01
+b_start = .35
+b_end = .65
+h_start = .65
+h_end = .85
 time_range = 'late'
 #directory = 'std/'
 
@@ -19,8 +19,12 @@ time_range = 'late'
 years = 500
 R = [1/4,1/5,1/6,1/7,1/9,1/15]    # Retirement rate at each level
 N = [13,8,5,3,2,1]   # Number of people at each level
-X = [0.4,0.3,0.2,0.1,0.05,0.01]   # Fraction of women at each level
-#X = [0.6,0.7,0.8,0.9,0.95,0.99]
+
+#X = [0.4,0.3,0.2,0.1,0.05,0.01]   # Fraction of women at each level
+#ic = ''
+X = [0.6,0.7,0.8,0.9,0.95,0.99]
+ic = '_ic'
+
 layer_names = ['undergrad','grad','postdoc','tenure track','tenured','full']
 
 b = b_start      # Bias
@@ -146,13 +150,13 @@ for i in range(0, h_range):   ## range of homophily
 
 ### Write to csv
 myData = np.array(out)
-myFile = open('std/' + file_string, 'w')
+myFile = open('std' + ic + '/' + file_string, 'w')
 with myFile:
    writer = csv.writer(myFile)
    writer.writerows(myData)
 
 myData = np.array(avg)
-myFile = open('avg/' + file_string, 'w')
+myFile = open('avg' + ic + '/' + file_string, 'w')
 with myFile:
     writer = csv.writer(myFile)
     writer.writerows(myData)
