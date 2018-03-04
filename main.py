@@ -16,8 +16,8 @@ X = [0.4,0.3,0.2,0.1,0.05,0.01]     # Fraction of women at each level (Initial C
 # Label for each layer
 layer_names = ['undergrad','grad','postdoc','tenure track','tenured','full']
 
-b = .65      # Bias, <.5 -> favors men, >.5 -> favors women
-mu = .7     # Mean for gaussian homophily distribution
+b = .5      # Bias, <.5 -> favors men, >.5 -> favors women
+mu = .5    # Mean for gaussian homophily distribution
 sigma = .3  # STD for gaussian homophily distribution
 
 # Index of highest layer
@@ -59,17 +59,17 @@ def f(u, v):
 
 
 ### Rate of change of fraction of women at each layer ###
-def dx(RR, rr, XX):
+def dx(XX):
     out = np.zeros(num_layers, dtype = np.float64)
-    out[0] = RR[0]*((1 + rr[0])*f(XX[0],.5) - XX[0] - rr[0]*f(XX[1],XX[0]))
-    for i in range(1, num_layers-1):
-        out[i] = RR[i]*((1 + rr[i])*f(XX[i],XX[i-1]) - XX[i] - rr[i]*f(XX[i+1],XX[i]))
-    out[L] = RR[L]*(f(XX[L], XX[L-1]) - XX[L])
+    out[0] = R[0]*((1 + r[0])*f(XX[0],.5) - XX[0] - r[0]*f(XX[1],XX[0]))
+    for i in range(1, L):
+        out[i] = R[i]*((1 + r[i])*f(XX[i],XX[i-1]) - XX[i] - r[i]*f(XX[i+1],XX[i]))
+    out[L] = R[L]*(f(XX[L], XX[L-1]) - XX[L])
     return out
 
 
 ### Integration over time t = years/100 ###
-def intode(RR, rr, XX, t):
+def intode(XX, t):
     out = []
     for i in range(num_layers):
         out.append([])
@@ -79,7 +79,7 @@ def intode(RR, rr, XX, t):
         if(i % 100 == 0):
             for i in range(num_layers):
                 out[i].append(XX[i])
-        XX += .01*dx(RR, rr, XX)
+        XX += .01*dx(XX)
     return out
 
 
@@ -88,7 +88,7 @@ def intode(RR, rr, XX, t):
 ### Graph Results ###
 #####################
 
-test = intode(R, r, X, years)
+test = intode(X, years)
 
 std = 0.
 for i in range(num_layers):

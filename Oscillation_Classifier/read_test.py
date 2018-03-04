@@ -4,8 +4,8 @@ import math
 import scipy.stats
 import csv
 
-name_string = '6_010_35-65_65-85_late.csv'
-directory = 'avg/'
+name_string = '6_050_00-1*_50-1*_late_40.csv'
+directory = 'std/'
 
 res = int(name_string[2:5])
 res = float(res/1000)

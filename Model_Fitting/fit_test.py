@@ -7,17 +7,17 @@ import csv
 name_string = 'Film_Industry.csv'
 directory = 'Data/'
 
+# open file
 with open(directory + name_string, newline='') as myFile:
     reader = csv.reader(myFile)
     reader = list(reader)
 
-
+# get layer names
 layer_names = []
 for j in range(len(reader[0])):
     layer_names.append(reader[0][j])
 
-print(layer_names)
-
+# get data
 data = []
 for i in range(1, len(reader)):
     data.append([])
@@ -25,14 +25,18 @@ for i in range(1, len(reader)):
         if(reader[i][j] != ''):
             data[i-1].append(float(reader[i][j]))
 
+IC = data[0]
 
 
-print(data)
+# compute number of layers
 num_layers = len(data[0])
+# number of years
 years = len(data)
-print(num_layers)
-print(years)
+# arrange data in "time series" format
 data = np.transpose(data)
+
+print(IC)
+
 
 T = np.arange(0, years, 1)
 plt.xlabel("Years")
