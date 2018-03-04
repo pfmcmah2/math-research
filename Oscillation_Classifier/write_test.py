@@ -23,7 +23,7 @@ N = [13,8,5,3,2,1]   # Number of people at each level
 #X = [0.4,0.3,0.2,0.1,0.05,0.01]   # Fraction of women at each level
 #ic = ''
 X = [0.6,0.7,0.8,0.9,0.95,0.99]
-ic = '_ic'
+ic = '_60'
 
 layer_names = ['undergrad','grad','postdoc','tenure track','tenured','full']
 
@@ -54,7 +54,7 @@ if(h_end == 1):
     file_string += '1*'
 else:
     file_string += str(int(h_end * 100))
-file_string += '_' + time_range + '.csv'
+file_string += '_' + time_range + ic + '.csv'
 
 print(file_string)
 
@@ -150,13 +150,13 @@ for i in range(0, h_range):   ## range of homophily
 
 ### Write to csv
 myData = np.array(out)
-myFile = open('std' + ic + '/' + file_string, 'w')
+myFile = open('std/' + file_string, 'w')
 with myFile:
    writer = csv.writer(myFile)
    writer.writerows(myData)
 
 myData = np.array(avg)
-myFile = open('avg' + ic + '/' + file_string, 'w')
+myFile = open('avg/' + file_string, 'w')
 with myFile:
     writer = csv.writer(myFile)
     writer.writerows(myData)

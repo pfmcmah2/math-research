@@ -1,12 +1,11 @@
-File Structure:
-Oscillation_Classifier
-  std - csv files for 
+
 
 CSV files are named using the following format.
-#layers_resolution_valuerange_timerange.csv
+#layers_resolution_valuerange_timerange_InitialCondition.csv
 
-ex. 6_low_20-80_30-70_late.csv
-  represents a 6 layer hierarchy with spacing of .1, value range of .2-.8 bias and .3-.7 homophily run over the last 50 years.
+ex. 6_low_20-80_30-70_late_40.csv
+  represents a 6 layer hierarchy with spacing of .1, value range of .2-.8 bias and .3-.7 homophily run over the last 50 years
+  starting with .4 women in the lowest layer.
 
 sigma = .3 for all
 

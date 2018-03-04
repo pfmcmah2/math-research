@@ -4,7 +4,9 @@ import math
 import scipy.stats
 import csv
 
-name_string = '6_010_35-65_65-85_late.csv'
+name_string = '6_010_35-65_65-85_late'
+c1 = '_40'
+c2 = '_60'
 
 res = int(name_string[2:5])
 res = float(res/1000)
@@ -42,14 +44,14 @@ print(y_size)
 
 
 
-with open('avg/' + name_string, newline='') as myFile:
+with open('avg/' + name_string + c1 + '.csv', newline='') as myFile:
     reader = csv.reader(myFile)
     reader = list(reader)
     for i in range(y_size):
         for j in range(x_size):
             reader[i][j] = float(reader[i][j])
 
-with open('avg_ic/' + name_string, newline='') as myFile:
+with open('avg/' + name_string + c2 + '.csv', newline='') as myFile:
     readeric = csv.reader(myFile)
     readeric = list(readeric)
     for i in range(y_size):
