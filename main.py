@@ -11,12 +11,12 @@ num_layers = 6                      # Number of layers in hierarchy
 years = 500                         # Number of years to simulate
 R = [1/4,1/5,1/6,1/7,1/9,1/15]      # Retirement rate at each level
 N = [13,8,5,3,2,1]                  # Number(Ratio) of people at each level
-X = [0.4,0.3,0.2,0.1,0.05,0.01]     # Fraction of women at each level (Initial Condition)
-
+#X = [0.4,0.3,0.2,0.1,0.05,0.01]     # Fraction of women at each level (Initial Condition)
+X = [0.6,0.7,0.8,0.9,0.95,0.99]
 # Label for each layer
 layer_names = ['undergrad','grad','postdoc','tenure track','tenured','full']
 
-b = .5      # Bias, <.5 -> favors men, >.5 -> favors women
+b = .5     # Bias, <.5 -> favors men, >.5 -> favors women
 mu = .5    # Mean for gaussian homophily distribution
 sigma = .3  # STD for gaussian homophily distribution
 
@@ -87,9 +87,13 @@ def intode(XX, t):
 #####################
 ### Graph Results ###
 #####################
+b_string = "." + str(round(b*100))
+h_string = "." + str(round(mu*100))
+
+
 
 test = intode(X, years)
-
+print(X)
 std = 0.
 for i in range(num_layers):
     print(np.std(test[i]))
@@ -97,7 +101,8 @@ for i in range(num_layers):
 T = np.arange(0, years, 1)
 plt.xlabel("Years")
 plt.ylabel("Fraction of Women")
-plt.title("MATH 492")
+plt.ylim(0,1)
+plt.title(b_string + " bias " + h_string + " homophily")
 for i in range(num_layers):
     plt.plot(T, test[i],label = layer_names[i])
 plt.legend()
