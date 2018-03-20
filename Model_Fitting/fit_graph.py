@@ -2,26 +2,52 @@ import matplotlib.pyplot as plt
 import numpy as np
 import math
 import scipy.stats
+import csv
 
 
-############################
-### initialize variables ###
-############################
-num_layers = 6                      # Number of layers in hierarchy
-years = 500                         # Number of years to simulate
-R = [1/4,1/5,1/6,1/7,1/9,1/15]      # Retirement rate at each level
-N = [13,8,5,3,2,1]                  # Number(Ratio) of people at each level
-X = [0.4,0.3,0.2,0.1,0.05,0.01]     # Fraction of women at each level (Initial Condition)
-#X = [0.6,0.7,0.8,0.9,0.95,0.99]
-# Label for each layer
-layer_names = ['undergrad','grad','postdoc','tenure track','tenured','full']
+b = .2
+mu = .5
+sigma = .3
 
-b = .45     # Bias, <.5 -> favors men, >.5 -> favors women
-mu = .5    # Mean for gaussian homophily distribution
-sigma = .3  # STD for gaussian homophily distribution
+
+name_string = 'Film_Industry.csv'
+directory = 'Data/'
+
+# open file
+with open(directory + name_string, newline='') as myFile:
+    reader = csv.reader(myFile)
+    reader = list(reader)
+
+# get layer names
+layer_names = []
+for j in range(len(reader[0])):
+    layer_names.append(reader[0][j])
+
+# get data
+data = []
+for i in range(1, len(reader)):
+    data.append([])
+    for j in range(len(reader[0])):
+        if(reader[i][j] != ''):
+            data[i-1].append(float(reader[i][j]))
+
+IC = data[0]
+
+# compute number of layers
+num_layers = len(data[0])
+# number of years
+years = len(data)
+# arrange data in "time series" format
+data = np.transpose(data)
+
+print(IC)
+
 
 # Index of highest layer
 L = num_layers - 1
+
+R = [1/4,1/5,1/6]      # Retirement rate at each level
+N = [13,8,5]           # Number(Ratio) of people at each level
 
 # initialize r, the ratio parameter
 r = np.zeros(num_layers, dtype = np.float64)
@@ -87,31 +113,20 @@ def intode(XX, t):
 #####################
 ### Graph Results ###
 #####################
-b_string = "." + str(round(b*100))
-h_string = "." + str(round(mu*100))
+#b_string = "." + str(round(b*100))
+#h_string = "." + str(round(mu*100))
 
 
 
-test = intode(X, years)
-print(X)
+test = intode(IC, years)
 std = 0.
-for i in range(num_layers):
-    print(np.std(test[i]))
 
 T = np.arange(0, years, 1)
 plt.xlabel("Years")
 plt.ylabel("Fraction of Women")
 plt.ylim(0,1)
-plt.title(b_string + " bias " + h_string + " homophily")
+#plt.title(b_string + " bias " + h_string + " homophily")
 for i in range(num_layers):
     plt.plot(T, test[i],label = layer_names[i])
 plt.legend()
 plt.show()
-
-
-'''
-
-G = np.arange(0, 1000, 1)
-plt.plot(G/1000, Normal)
-plt.legend()
-plt.show()'''

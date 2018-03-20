@@ -129,7 +129,7 @@ for i in range(0, h_range):   ## range of homophily
     ### create gaussian for this mu
     Normal = (np.zeros(1000, dtype = np.float64))   # gaussian DP
     for j in range(0, 1000):
-            Normal[j] = scipy.stats.norm(mu, sigma).pdf(j/1000)
+        Normal[j] = scipy.stats.norm(mu, sigma).pdf(j/1000)
 
     out.append([])      ## create subarray for this mu
     avg.append([])

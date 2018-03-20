@@ -4,6 +4,12 @@ import math
 import scipy.stats
 import csv
 
+
+### Takes in time series data from one industry and runs our model over varying
+### bias and homophily values, computing the square of the difference at each
+### layer at each year. This is a brute force method which assumes a normal
+### homophily with sigma = .3
+
 name_string = 'Film_Industry.csv'
 directory = 'Data/'
 
@@ -27,7 +33,6 @@ for i in range(1, len(reader)):
 
 IC = data[0]
 
-
 # compute number of layers
 num_layers = len(data[0])
 # number of years
@@ -39,22 +44,11 @@ print(IC)
 
 
 
-'''
-T = np.arange(0, years, 1)
-plt.xlabel("Years")
-plt.ylabel("Fraction of Women")
-plt.title("MATH 492")
-for i in range(num_layers):
-    plt.plot(T, data[i],label = layer_names[i])
-plt.legend()
-plt.show()
-'''
-
 R = [1/4,1/5,1/6,1/7,1/9,1/15]
 N = [13,8,5,3,2,1]
 
-b = .1
-mu = .6
+b = .5
+mu = .5
 sigma = .3
 
 L = num_layers - 1
@@ -82,23 +76,49 @@ def dx(RR, rr, XX):
     out[L] = RR[L]*(f(XX[L], XX[L-1]) - XX[L])
     return out
 ### Integration over time t = years/100 ###
-def intode(RR, rr, XX, t):
-    out = []
-    for i in range(num_layers):
-        out.append([])
-
+def intodediff(RR, rr, XX, t, data):
+    out = 0.0
     for i in range(t*100):
         if(i % 100 == 0):
             for j in range(num_layers):
-                out[j].append(XX[j])
+                out += (XX[j] - data[j][round(i/100)])**2
         XX += .01*dx(RR, rr, XX)
     return out
 
-test = intode(R,r,IC,years)
 
-diff = 0.0
-for j in range(num_layers):
-    for i in range(years):
-        diff += abs(test[j][i] - data[j][i])
+#diff = intodediff(R,r,IC,years,data)
+out = []
+min_val = 1000000
+min_param = [0,0]
 
-print(diff)
+for i in range(6):
+    Normal = (np.zeros(1000, dtype = np.float64))   # gaussian DP
+    for j in range(0, 1000):
+        Normal[j] = scipy.stats.norm(mu, sigma).pdf(j/1000)
+    out.append([])
+    b = 0.0
+
+    for j in range(11):
+        temp = intodediff(R,r,IC,years,data)
+        out[i].append(temp)
+        if(temp < min_val):
+            min_val = temp
+            min_param = [b,mu]
+        b += .1
+        print(i,j)
+    mu += .1
+
+
+print(out)
+print(min_val, min_param)
+
+x = np.arange(0, 1.1, .1)
+y = np.arange(.5, 1.1, .1)
+x, y = np.meshgrid(x, y)
+
+plt.pcolormesh(x, y, out)
+plt.xlabel("Bias")
+plt.ylabel("Homophily")
+plt.title('diff')
+plt.colorbar() #need a colorbar to show the intensity scale
+plt.show() #boom

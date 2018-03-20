@@ -5,7 +5,7 @@ import scipy.stats
 import csv
 
 name_string = '6_050_00-1*_50-1*_late_40.csv'
-directory = 'std/'
+directory = 'avg/'
 
 res = int(name_string[2:5])
 res = float(res/1000)
@@ -60,5 +60,6 @@ with open(directory + name_string, newline='') as myFile:
     plt.xlabel("Bias")
     plt.ylabel("Homophily")
     plt.ylim([y_low,y_high-res])
+    plt.title('Mean')
     plt.colorbar() #need a colorbar to show the intensity scale
     plt.show() #boom
