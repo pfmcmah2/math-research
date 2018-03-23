@@ -7,7 +7,7 @@ import csv
 
 b = .2
 mu = .5
-sigma = .3
+sigma = .9
 
 
 name_string = 'Film_Industry.csv'
@@ -31,23 +31,27 @@ for i in range(1, len(reader)):
         if(reader[i][j] != ''):
             data[i-1].append(float(reader[i][j]))
 
-IC = data[0]
+
 
 # compute number of layers
 num_layers = len(data[0])
-# number of years
-years = len(data)
 # arrange data in "time series" format
+data = data[60:]
+IC = data[0]
 data = np.transpose(data)
+# number of years
+years = len(data[0])
 
 print(IC)
+#print(data)
 
 
 # Index of highest layer
 L = num_layers - 1
 
-R = [1/4,1/5,1/6]      # Retirement rate at each level
-N = [13,8,5]           # Number(Ratio) of people at each level
+R = [1/4,1/5,1/6,1/7,1/9,1/15]  # Retirement rate at each level
+N = [13,8,5,3,2,1]              # Number(Ratio) of people at each level
+
 
 # initialize r, the ratio parameter
 r = np.zeros(num_layers, dtype = np.float64)
@@ -80,7 +84,7 @@ for i in range(0, 1000):
 
 ### Fraction of women promoted to layer u from layer v ###
 def f(u, v):
-    # return b*v*P(u)/(b*v*P(u) + (1 - b)*(1 - v)*P(1 - u))
+    #return b*v*u/(b*v*u + (1 - b)*(1 - v)*(1 - u))
     return b*v*Normal[math.floor(u*1000)]/(b*v*Normal[math.floor(u*1000)] + (1 - b)*(1 - v)*Normal[math.floor((1 - u)*1000)])
 
 
@@ -99,12 +103,14 @@ def intode(XX, t):
     out = []
     for i in range(num_layers):
         out.append([])
+    out[0] = data[0]
     for i in range(t*100):
         #print(XX)
         #print(dx(RR, rr, XX))
         if(i % 100 == 0):
-            for i in range(num_layers):
-                out[i].append(XX[i])
+            XX[0] = data[0][round(i/100)]
+            for j in range(1, num_layers):
+                out[j].append(XX[j])
         XX += .01*dx(XX)
     return out
 
@@ -115,7 +121,7 @@ def intode(XX, t):
 #####################
 #b_string = "." + str(round(b*100))
 #h_string = "." + str(round(mu*100))
-
+color = ['bo', 'ro', 'bo']
 
 
 test = intode(IC, years)
@@ -127,6 +133,8 @@ plt.ylabel("Fraction of Women")
 plt.ylim(0,1)
 #plt.title(b_string + " bias " + h_string + " homophily")
 for i in range(num_layers):
-    plt.plot(T, test[i],label = layer_names[i])
+    plt.plot(T, data[i],label = layer_names[i])
+for i in range(1, num_layers):
+    plt.plot(T, test[i])
 plt.legend()
 plt.show()

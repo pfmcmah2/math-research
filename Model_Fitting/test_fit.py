@@ -66,7 +66,10 @@ for j in range(0, 1000):
 ### Fraction of women promoted to layer u from layer v ###
 def f(u, v):
     #return b*v*P(u)/(b*v*P(u) + (1 - b)*(1 - v)*P(1 - u))
+    if(u > 1):
+        u = 1
     return b*v*Normal[math.floor(u*999)]/(b*v*Normal[math.floor(u*999)] + (1 - b)*(1 - v)*Normal[math.floor((1 - u)*999)])
+
 ### Rate of change of fraction of women at each layer ###
 def dx(RR, rr, XX):
     out = np.zeros(num_layers, dtype = np.float64)
@@ -90,35 +93,28 @@ def intodediff(RR, rr, XX, t, data):
 out = []
 min_val = 1000000
 min_param = [0,0]
+sigma = .1
 
-for i in range(6):
-    Normal = (np.zeros(1000, dtype = np.float64))   # gaussian DP
-    for j in range(0, 1000):
-        Normal[j] = scipy.stats.norm(mu, sigma).pdf(j/1000)
-    out.append([])
-    b = 0.0
-
-    for j in range(11):
-        temp = intodediff(R,r,IC,years,data)
-        out[i].append(temp)
-        if(temp < min_val):
-            min_val = temp
-            min_param = [b,mu]
-        b += .1
-        print(i,j)
-    mu += .1
+for k in range(5):
+    mu = .5
+    for i in range(6):
+        Normal = (np.zeros(1000, dtype = np.float64))   # gaussian DP
+        for j in range(0, 1000):
+            Normal[j] = scipy.stats.norm(mu, sigma).pdf(j/1000)
+        out.append([])
+        b = 0.0
+        for j in range(11):
+            temp = intodediff(R,r,IC,years,data)
+            out[i].append(temp)
+            if(temp < min_val):
+                min_val = temp
+                min_param = [b,mu,sigma]
+            b += .1
+            print(i,j)
+        mu += .1
+    sigma += .1
+    print(k)
 
 
 print(out)
 print(min_val, min_param)
-
-x = np.arange(0, 1.1, .1)
-y = np.arange(.5, 1.1, .1)
-x, y = np.meshgrid(x, y)
-
-plt.pcolormesh(x, y, out)
-plt.xlabel("Bias")
-plt.ylabel("Homophily")
-plt.title('diff')
-plt.colorbar() #need a colorbar to show the intensity scale
-plt.show() #boom
