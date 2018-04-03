@@ -10,7 +10,7 @@ import csv
 ### layer at each year. This is a brute force method which assumes a normal
 ### homophily with sigma = .3
 
-name_string = 'Film_Industry.csv'
+name_string = 'Academia_Engineering.csv'
 directory = 'Data/'
 
 # open file
@@ -81,10 +81,12 @@ def dx(RR, rr, XX):
 ### Integration over time t = years/100 ###
 def intodediff(RR, rr, XX, t, data):
     out = 0.0
+    w = 1.0
     for i in range(t*100):
         if(i % 100 == 0):
             for j in range(num_layers):
-                out += (XX[j] - data[j][round(i/100)])**2
+                out += w*(XX[j] - data[j][round(i/100)])**2
+            w += 1/num_layers
         XX += .01*dx(RR, rr, XX)
     return out
 
@@ -92,7 +94,7 @@ def intodediff(RR, rr, XX, t, data):
 #diff = intodediff(R,r,IC,years,data)
 out = []
 min_val = 1000000
-min_param = [0,0]
+min_param = [0,0,0]
 sigma = .1
 
 for k in range(5):

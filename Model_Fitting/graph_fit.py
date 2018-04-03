@@ -7,10 +7,10 @@ import csv
 
 b = .2
 mu = .5
-sigma = .3
+sigma = .5
 
 
-name_string = 'Film_Industry.csv'
+name_string = 'Academia_Engineering.csv'
 directory = 'Data/'
 
 # open file
@@ -69,8 +69,8 @@ def P(x):
     return scipy.stats.norm(mu, sigma).pdf(x) #/scipy.stats.norm(mu, sigma).pdf(mu)
 
 # Store homophily parameter in lookup table to decrease runtime
-Normal = np.zeros(1000, dtype = np.float64)   # gaussian List
-for i in range(0, 1000):
+Normal = np.zeros(1001, dtype = np.float64)   # gaussian List
+for i in range(0, 1001):
     Normal[i] = P(i/1000)
 
 
