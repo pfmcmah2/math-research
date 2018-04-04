@@ -1,7 +1,3 @@
-######## !!!!!!!!!!!!
-# Assuming x <= .5 for all values for testing
-
-
 import matplotlib.pyplot as plt
 import numpy as np
 import math
@@ -24,7 +20,7 @@ import matplotlib
 ################
 ### Get data ###
 ################
-name_string = 'Academia_Psychology.csv'
+name_string = 'Academia_Engineering.csv'
 directory = 'Data/'
 
 # open file
@@ -45,6 +41,8 @@ for i in range(1, len(reader)):
         if(reader[i][j] != ''):
             data[i-1].append(float(reader[i][j]))
 
+data = data[5:]
+
 IC = data[0]
 # compute number of layers
 num_layers = len(data[0])
@@ -62,10 +60,10 @@ print(data)
 
 # These values are a guess, but they might not matter?
 # Try varying them later
-#R = [2/4,2/5,2/6,2/7,2/9,2/15]
+#R = [1/4,1/8,2/6,2/7,2/9,2/15]
 R = [1/4,1/5,1/6,1/7,1/9,1/15]      # Retirement rate at each level
 N = [13,8,5,3,2,1]                  # Number(Ratio) of people at each level
-mu = .5
+mu = .7
 sigma = .3
 L = num_layers - 1
 max_len = 0
@@ -116,27 +114,50 @@ def GetB(t):
         bias[i].append(b)
         fprev = f
 
+def normalize(exb):
+    max_val = 0
+    min_val = 1
+    for i in range(num_layers):
+        for j in range(years - 1):
+            max_val = max(max_val, bias[i][j])
+            min_val = min(min_val, bias[i][j])
+
+    if(min_val < 0):
+        max_val -= min_val
+    for i in range(num_layers):
+        for j in range(years - 1):
+            if(min_val < 0):
+                bias[i][j] -= min_val
+            bias[i][j] = exb*bias[i][j]/max_val
+
+def removeOutliers():
+    std = []
+    mean = []
+    for i in range(num_layers):
+        std.append(np.std(bias[i]))
+        mean.append(np.mean(bias[i]))
+
+    rem = 0
+    for i in range(num_layers):
+        for j in range(years - 1):
+            if((bias[i][j] < mean[i] - std[i] or bias[i][j] > mean[i] + std[i]) and j > 0):
+                bias[i][j] = bias[i][j - 1]
+                rem += 1
+    print('rem =', rem)
+
 
 
 
 for i in range(years - 1):
-    print(i)
     GetB(i)
 
-max_val = 0
-for i in range(num_layers):
-    for j in range(years - 1):
-        max_val = max(max_val, bias[i][j])
 
-for i in range(num_layers):
-    for j in range(years - 1):
-        bias[i][j] = bias[i][j]/max_val
-
-
+normalize(.4)
+removeOutliers()
 
 T = np.arange(0, years - 1, 1)
 for i in range(num_layers):
     plt.plot(T, bias[i], label = layer_names[i])
-plt.ylim(0,1)
+#plt.ylim(0,1)
 plt.legend()
 plt.show()
