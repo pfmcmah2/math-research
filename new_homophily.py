@@ -4,6 +4,10 @@ import math
 import scipy.stats
 
 
+# Homophily is given by P(u,v) where v is the fraction at the lower level
+# and u is the fraction at the higher level.
+# P(u) = pdf(u) of the normal distribution with mean v and var sigma (arbitrary)
+
 ############################
 ### initialize variables ###
 ############################
@@ -11,14 +15,16 @@ num_layers = 6                      # Number of layers in hierarchy
 years = 500                         # Number of years to simulate
 R = [1/4,1/5,1/6,1/7,1/9,1/15]      # Retirement rate at each level
 N = [13,8,5,3,2,1]                  # Number(Ratio) of people at each level
-X = [0.4,0.3,0.2,0.1,0.05,0.01]     # Fraction of women at each level (Initial Condition)
-#X = [0.6,0.7,0.8,0.9,0.95,0.99]
+#X = [0.4,0.3,0.2,0.1,0.05,0.01]     # Fraction of women at each level (Initial Condition)
+X = [0.6,0.7,0.8,0.9,0.95,0.99]
 # Label for each layer
 layer_names = ['undergrad','grad','postdoc','tenure track','tenured','full']
 
-b = .5     # Bias, <.5 -> favors men, >.5 -> favors women
-mu = .7    # Mean for gaussian homophily distribution
+b = .3     # Bias, <.5 -> favors men, >.5 -> favors women
 sigma = .3  # STD for gaussian homophily distribution
+
+sigma2 = sigma**2
+sqt = np.sqrt(6.28318*sigma2)
 
 # Index of highest layer
 L = num_layers - 1
@@ -37,14 +43,10 @@ for i in range(num_layers):
 ### Homophily, either linear or gaussian ###
 ############################################
 
-def P(x):
-    #return x
-    return scipy.stats.norm(mu, sigma).pdf(x) #/scipy.stats.norm(mu, sigma).pdf(mu)
+def P(u,v):
+    #return 1 - abs(u-v)
+    return (2.71828**(((u-v)**2)/(-2*sigma2)))/sqt
 
-# Store homophily parameter in lookup table to decrease runtime
-Normal = np.zeros(1000, dtype = np.float64)   # gaussian List
-for i in range(0, 1000):
-    Normal[i] = P(i/1000)
 
 
 
@@ -55,7 +57,7 @@ for i in range(0, 1000):
 ### Fraction of women promoted to layer u from layer v ###
 def f(u, v):
     # return b*v*P(u)/(b*v*P(u) + (1 - b)*(1 - v)*P(1 - u))
-    return b*v*Normal[math.floor(u*1000)]/(b*v*Normal[math.floor(u*1000)] + (1 - b)*(1 - v)*Normal[math.floor((1 - u)*1000)])
+    return b*v*P(u, v)/(b*v*P(u, v) + (1 - b)*(1 - v)*P(1 - u,1 - v))
 
 
 ### Rate of change of fraction of women at each layer ###
@@ -87,8 +89,6 @@ def intode(XX, t):
 #####################
 ### Graph Results ###
 #####################
-b_string = "." + str(round(b*100))
-h_string = "." + str(round(mu*100))
 
 
 
@@ -102,7 +102,7 @@ T = np.arange(0, years, 1)
 plt.xlabel("Years")
 plt.ylabel("Fraction of Women")
 plt.ylim(0,1)
-plt.title(b_string + " bias " + h_string + " homophily")
+plt.title("bias = " "." + str(round(b*10)) + "     " " sigma = " + "." + str(round(sigma*10)))
 for i in range(num_layers):
     plt.plot(T, test[i],label = layer_names[i])
 plt.legend()

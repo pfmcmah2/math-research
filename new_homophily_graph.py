@@ -16,9 +16,11 @@ X = [0.4,0.3,0.2,0.1,0.05,0.01]     # Fraction of women at each level (Initial C
 # Label for each layer
 layer_names = ['undergrad','grad','postdoc','tenure track','tenured','full']
 
-b = .5     # Bias, <.5 -> favors men, >.5 -> favors women
-mu = .7    # Mean for gaussian homophily distribution
+b = .4     # Bias, <.5 -> favors men, >.5 -> favors women
+mu = .9    # Mean for gaussian homophily distribution
 sigma = .3  # STD for gaussian homophily distribution
+sigma2 = sigma**2
+sqt = np.sqrt(6.28318*sigma2)
 
 # Index of highest layer
 L = num_layers - 1
@@ -37,14 +39,11 @@ for i in range(num_layers):
 ### Homophily, either linear or gaussian ###
 ############################################
 
-def P(x):
+def P(u,v):
     #return x
-    return scipy.stats.norm(mu, sigma).pdf(x) #/scipy.stats.norm(mu, sigma).pdf(mu)
+    #return scipy.stats.norm(mu, sigma).pdf(x) #/scipy.stats.norm(mu, sigma).pdf(mu)
+    return (2.71828**(((u-v)**2)/(-2*sigma2)))/sqt
 
-# Store homophily parameter in lookup table to decrease runtime
-Normal = np.zeros(1000, dtype = np.float64)   # gaussian List
-for i in range(0, 1000):
-    Normal[i] = P(i/1000)
 
 
 
@@ -55,7 +54,7 @@ for i in range(0, 1000):
 ### Fraction of women promoted to layer u from layer v ###
 def f(u, v):
     # return b*v*P(u)/(b*v*P(u) + (1 - b)*(1 - v)*P(1 - u))
-    return b*v*Normal[math.floor(u*1000)]/(b*v*Normal[math.floor(u*1000)] + (1 - b)*(1 - v)*Normal[math.floor((1 - u)*1000)])
+    return b*v*P(u, v)/(b*v*P(u, v) + (1 - b)*(1 - v)*P(1 - u,1 - v))
 
 
 ### Rate of change of fraction of women at each layer ###
@@ -87,11 +86,34 @@ def intode(XX, t):
 #####################
 ### Graph Results ###
 #####################
-b_string = "." + str(round(b*100))
-h_string = "." + str(round(mu*100))
+
+b = 0.0
+for i in range(0,3):
+    sigma = 0.1
+    for j in range(0,3):
+        sigma2 = sigma**2
+        sqt = np.sqrt(6.28318*sigma2)
+        X = [0.4,0.3,0.2,0.1,0.05,0.01]
+        test = intode(X, years)
+        T = np.arange(0, years, 1)
+        plt.xlabel("Years")
+        plt.ylabel("Fraction of Women")
+        plt.ylim(0,1)
+        plt.title("." + str(round(b*10)) + " bias " + "." + str(round(sigma*10)) + " homophily")
+        for i in range(num_layers):
+            plt.plot(T, test[i],label = layer_names[i])
+        plt.legend()
+        out_string = "new_h_graphs/" + str(round(b*10)) + str(round(sigma*10))
+        plt.savefig(out_string)
+        plt.clf()
+        plt.cla()
+        plt.close()
+        sigma += .1
+        print(i,j)
+    b += .1
 
 
-
+'''
 test = intode(X, years)
 print(X)
 std = 0.
@@ -107,3 +129,4 @@ for i in range(num_layers):
     plt.plot(T, test[i],label = layer_names[i])
 plt.legend()
 plt.show()
+'''

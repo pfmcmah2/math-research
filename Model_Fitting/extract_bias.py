@@ -153,7 +153,7 @@ for i in range(years - 1):
 
 
 normalize(.4)
-removeOutliers()
+#removeOutliers()
 
 T = np.arange(0, years - 1, 1)
 for i in range(num_layers):

@@ -19,6 +19,8 @@ import matplotlib
 # If there is high variation within one list, there is not a consitent
 # homophily function => hypothesis might be wrong?
 
+# Looking at homophily seperately for each layer
+
 # 1. If 1-u is chosen for the index, store 1/m.
 
 ################
@@ -89,7 +91,8 @@ for i in range(501):
 
 # predicted shape of homophily
 def P(x):
-    return scipy.stats.norm(mu, sigma).pdf(x)
+    #return scipy.stats.norm(mu, sigma).pdf(x)
+    return (x-.5)**2
     #return x
 
 def GetH(t):
@@ -110,7 +113,7 @@ def GetH(t):
     else:
         homophily[1000-index].append(1/m)
     fprev = f
-    for i in range(L-1, -1, -1):
+    '''for i in range(L-1, -1, -1):
         # dx[i] = R[i]*((1 + r[i])*f(X[i],X[i-1]) - XX[i] - r[i]*f(X[i+1],X[i]))
         # f(X[i],X[i-1]) = (dx[i]/R[i] + X[i] + r[i]*f(X[i+1],X[i]))(1 + r[i])
         f = (X[i] + r[i]*fprev + dx[i]/R[i])*(1 + r[i])
@@ -125,7 +128,7 @@ def GetH(t):
             homophily[index].append(m)
         else:
             homophily[1000-index].append(1/m)
-        fprev = f
+        fprev = f'''
 
 
 
@@ -148,8 +151,8 @@ for i in range(len(homophily)):
 
 mean = np.mean(ahomophily[1])
 std = np.std(ahomophily[1])
-min_val = mean - std
-max_val = mean + std
+min_val = mean - 3*std
+max_val = mean + 3*std
 
 rhomophily = [[],[]]    # ahomophily with outliers removed
 rem = 0
@@ -221,7 +224,7 @@ for i in range(len(rhomophily[0])):
         fhomophily[1].append(last * rhomophily[1][i])
         last = last * rhomophily[1][i]'''
 
-print(fhomophily)
+#print(fhomophily)
 plt.xlim(0,1)
 matplotlib.pyplot.scatter(fhomophily[0], fhomophily[1])
 plt.show()
