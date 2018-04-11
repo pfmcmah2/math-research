@@ -22,7 +22,7 @@ import matplotlib
 ################
 ### Get data ###
 ################
-name_string = 'Academia_Psychology.csv'
+name_string = 'Academia_Physics.csv'
 directory = 'Data/'
 
 # open file
@@ -76,10 +76,8 @@ for i in range(num_layers):
     r[i] /= (R[i]*N[i])
 
 homophily = []
-for i in range(num_layers):
+for i in range(501):
     homophily.append([])
-    for j in range(501):
-        homophily[i].append([])
 
 
 
@@ -107,11 +105,11 @@ def GetH(t):
     # m = f*(1-b)(1-v)/(b*v*(1-f))
     m = f*(1-b)*(1-v)/(b*v*(1-f))
     if(index <= 500):
-        homophily[L][index].append(m)
+        homophily[index].append(m)
     else:
-        homophily[L][1000-index].append(1/m)
+        homophily[1000-index].append(1/m)
     fprev = f
-    for i in range(L-1, -1, -1):
+    '''for i in range(L-1, -1, -1):
         # dx[i] = R[i]*((1 + r[i])*f(X[i],X[i-1]) - XX[i] - r[i]*f(X[i+1],X[i]))
         # f(X[i],X[i-1]) = (dx[i]/R[i] + X[i] + r[i]*f(X[i+1],X[i]))(1 + r[i])
         f = (X[i] + r[i]*fprev + dx[i]/R[i])*(1 + r[i])
@@ -123,10 +121,10 @@ def GetH(t):
         index = int(round(u*1000))
         m = f*(1-b)*(1-v)/(b*v*(1-f))
         if(index <= 500):
-            homophily[i][index].append(m)
+            homophily[index].append(m)
         else:
-            homophily[i][1000-index].append(1/m)
-        fprev = f
+            homophily[1000-index].append(1/m)
+        fprev = f'''
 
 
 
@@ -135,66 +133,94 @@ for i in range(years - 1):
 
 #print(homophily)
 
-# each element of ahomophily is a
 # list of observed fractions and associated average m values
 # by nature of its construction this list is sorted by fraction value
 # this is needed for building the final funciton
 # taking the average deals with overlapping m values but having very different
 # overlapping m values implies that this is not a function so keep that in mind
+ahomophily = [[],[]]
 
-ahomophily = []
-for i in range(num_layers):
-    ahomophily.append([[],[]])
+for i in range(len(homophily)):
+    if(len(homophily[i]) != 0):
+        ahomophily[0].append(i/1000)
+        ahomophily[1].append(np.mean(homophily[i]))
 
-for j in range(num_layers):
-    for i in range(len(homophily[j])):
-        if(len(homophily[j][i]) != 0):
-            ahomophily[j][0].append(i/1000)
-            ahomophily[j][1].append(np.mean(homophily[j][i]))
+mean = np.mean(ahomophily[1])
+std = np.std(ahomophily[1])
+min_val = mean - 3*std
+max_val = mean + 3*std
 
-print(ahomophily)
-
-'''rhomophily = []         # ahomophily with outliers removed
+rhomophily = [[],[]]    # ahomophily with outliers removed
 rem = 0
 
-    mean = np.mean(ahomophily[1])
-    std = np.std(ahomophily[1])
-    min_val = mean - 3*std
-    max_val = mean + 3*std
-
-    rhomophily = [[],[]]
-
-
-    for i in range(len(ahomophily[0])):
-        if(ahomophily[1][i] > min_val and ahomophily[1][i] < max_val):
-            rhomophily[0].append(ahomophily[0][i])
-            rhomophily[1].append(ahomophily[1][i])
-        else:
-            rem += 1
+for i in range(len(ahomophily[0])):
+    if(ahomophily[1][i] > min_val and ahomophily[1][i] < max_val):
+        rhomophily[0].append(ahomophily[0][i])
+        rhomophily[1].append(ahomophily[1][i])
+    else:
+        rem += 1
 
 print(rem)
-'''
+
 # final function, stored in "scatter plot" format
 # "fills out" function in back and forth format
 # lots of room for creativity here
 # last holds last value filled in
-fhomophily = []
-for i in range(num_layers):
-    fhomophily.append([[],[]])
+fhomophily = [[],[]]
 
 ### Assigns pairs based on min difference from a predicted homophily function, P(x)
-for j in range(num_layers):
-    for i in range(len(ahomophily[j][0])):
-        m = ahomophily[j][1][i]
-        u = ahomophily[j][0][i]
-        l = (m*P(1-u) + P(u))/(m**2 + 1)
-        r = l * m
-        fhomophily[j][0].append(ahomophily[j][0][i])
-        fhomophily[j][1].append(l)
-        fhomophily[j][0].append(1 - ahomophily[j][0][i])
-        fhomophily[j][1].append(r)
+for i in range(len(rhomophily[0])):
+    m = rhomophily[1][i]
+    u = rhomophily[0][i]
+    l = (m*P(1-u) + P(u))/(m**2 + 1)
+    r = l * m
+    fhomophily[0].append(rhomophily[0][i])
+    fhomophily[1].append(l)
+    fhomophily[0].append(1 - rhomophily[0][i])
+    fhomophily[1].append(r)
 
+
+
+### Assigns pairs given smallest square distance to last pair
+# ! seems to cluster around 0 :(
+'''l = 1.0
+r = rhomophily[1][0]
+fhomophily[0].append(rhomophily[0][0])
+fhomophily[1].append(l)
+fhomophily[0].append(1 - rhomophily[0][0])
+fhomophily[1].append(r)
+
+for i in range(1, len(rhomophily[0])):
+    m = rhomophily[1][i]
+    l = (m*l + r)/(m**2 + 1)
+    r = l * m
+    fhomophily[0].append(rhomophily[0][i])
+    fhomophily[1].append(l)
+    fhomophily[0].append(1 - rhomophily[0][i])
+    fhomophily[1].append(r)'''
+
+
+### Assigns pairs at the same time Alternates between <.5 and >.5 assinging
+### current value on a given side to the last value seen on that side
+'''last = 1.0
+for i in range(len(rhomophily[0])):
+    if(i%2 == 0):
+        if(i != 0):
+            last += rhomophily[0][i] - rhomophily[0][i-1]
+        fhomophily[0].append(rhomophily[0][i])
+        fhomophily[1].append(last)
+        fhomophily[0].append(1 - rhomophily[0][i])
+        fhomophily[1].append(last * rhomophily[1][i])
+        last = last * rhomophily[1][i]
+    else:
+        last -= rhomophily[0][i] - rhomophily[0][i-1]
+        fhomophily[0].append(1 - rhomophily[0][i])
+        fhomophily[1].append(last)
+        fhomophily[0].append(rhomophily[0][i])
+        fhomophily[1].append(last * rhomophily[1][i])
+        last = last * rhomophily[1][i]'''
+
+#print(fhomophily)
 plt.xlim(0,1)
-for i in range(num_layers):
-    matplotlib.pyplot.scatter(fhomophily[i][0], fhomophily[i][1])
-    plt.show()
+matplotlib.pyplot.scatter(fhomophily[0], fhomophily[1])
+plt.show()
