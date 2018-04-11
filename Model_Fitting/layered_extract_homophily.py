@@ -196,5 +196,6 @@ for j in range(num_layers):
 
 plt.xlim(0,1)
 for i in range(num_layers):
+    plt.title(layer_names[i])
     matplotlib.pyplot.scatter(fhomophily[i][0], fhomophily[i][1])
     plt.show()

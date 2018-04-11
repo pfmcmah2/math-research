@@ -3,6 +3,7 @@ import numpy as np
 import math
 import scipy.stats
 import csv
+import matplotlib
 
 
 b = .2
@@ -129,6 +130,7 @@ plt.ylim(0,1)
 #plt.title(b_string + " bias " + h_string + " homophily")
 for i in range(num_layers):
     plt.plot(T, test[i],label = layer_names[i])
-    plt.plot(T, data[i])
+    #plt.plot(T, data[i])
+    matplotlib.pyplot.scatter(T, data[i])
 plt.legend()
 plt.show()
