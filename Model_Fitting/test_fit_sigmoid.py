@@ -87,14 +87,21 @@ def intodediff(RR, rr, XX, t, data):
     return out
 
 
-#diff = intodediff(R,r,IC,years,data)
-#out = []
+
 min_val = 1000000
 min_param = [0,0,0]
 lam = 1
 
+### Turn this into an iterative method finding multiple minimums and running
+### another search centered at those found minimums with higher resolution
+### hold the temporary found minimums in a prioity queue, select the n smallest
+### for the next iteration, n could increase at each layer of iteration
+### more iterations -> higher precision, higher n -> more likely to find true
+### global min, less likely to fall into local min trap
+
+
 for i in range(9):
-    b = .45
+    b = .5
     for j in range(20):
         #out.append([])
         temp = intodediff(R,r,IC,years,data)
@@ -103,7 +110,7 @@ for i in range(9):
             min_val = temp
             min_param = [b,lam]
         b += .01
-        print(i,j)
+    print(lam, min_val)
     lam += 1
 
 
