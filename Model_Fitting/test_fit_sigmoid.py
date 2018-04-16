@@ -10,7 +10,7 @@ import csv
 ### layer at each year. This is a brute force method which assumes a normal
 ### homophily with sigma = .3
 
-name_string = 'Academia_Psychology.csv'
+name_string = 'Academia_Engineering.csv'
 directory = 'Data/'
 
 # open file
@@ -31,6 +31,7 @@ for i in range(1, len(reader)):
         if(reader[i][j] != ''):
             data[i-1].append(float(reader[i][j]))
 
+# get initial condition for simulation
 IC = data[0]
 
 # compute number of layers
@@ -43,14 +44,17 @@ data = np.transpose(data)
 print(IC)
 
 
-
+# retirement rate and size of each layer
 R = [1/4,1/5,1/6,1/7,1/9,1/15]
 N = [13,8,5,3,2,1]
 
+# initialize bias and lambda
 b = .5
-lam = 10
+lam = 1
 
+# index for top layer
 L = num_layers - 1
+
 # initialize r, the ratio parameter
 r = np.zeros(num_layers, dtype = np.float64)
 for i in range(num_layers):
@@ -61,7 +65,7 @@ for i in range(num_layers):
 
 ### Fraction of women promoted to layer u from layer v ###
 def P(u, v):
-    #return b*v*P(u)/(b*v*P(u) + (1 - b)*(1 - v)*P(1 - u))
+    # sigmoid funciton
     return 1/(1 + 2.71828**(-lam*(u - v)))
 
 def f(u, v):
@@ -78,16 +82,19 @@ def dx(RR, rr, XX):
 
 ### Integration over time t = years/100 ###
 def intodediff(RR, rr, XX, t, data):
-    out = 0.0
+    out = 0.0   # sum of square error
     for i in range(t*100):
         if(i % 100 == 0):
             for j in range(num_layers):
+                # error for each layer for each year
+                # second index of data represents year
                 out += (XX[j] - data[j][round(i/100)])**2
+        # update layer fractons
         XX += .01*dx(RR, rr, XX)
     return out
 
 
-
+# initialize variables for finding/storing minimium error parameters
 min_val = 1000000
 min_param = [0,0,0]
 lam = 1
@@ -99,20 +106,20 @@ lam = 1
 ### more iterations -> higher precision, higher n -> more likely to find true
 ### global min, less likely to fall into local min trap
 
-
+lam = 4.5
 for i in range(9):
-    b = .5
-    for j in range(20):
-        #out.append([])
+    b = .45
+    for j in range(9):
+        # compute error for curren bias and lambda
         temp = intodediff(R,r,IC,years,data)
-        #out[i].append(temp)
         if(temp < min_val):
             min_val = temp
             min_param = [b,lam]
         b += .01
+    # used to check progress in terminal, remove for performance
     print(lam, min_val)
-    lam += 1
+    lam += .1
 
 
-#print(out)
+# return minumum error and corresponding parameters
 print(min_val, min_param)

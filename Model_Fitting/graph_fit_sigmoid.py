@@ -6,11 +6,11 @@ import csv
 import matplotlib
 
 
-b = .52
-lam = 3.23
+b = .47
+lam = 4.7
 
 
-name_string = 'Academia_Psychology.csv'
+name_string = 'Academia_Engineering.csv'
 directory = 'Data/'
 
 # open file
@@ -92,6 +92,7 @@ def dx(XX):
 
 ### Integration over time t = years/100 ###
 def intode(XX, t):
+    global error
     out = []
     for i in range(num_layers):
         out.append([])
@@ -99,8 +100,9 @@ def intode(XX, t):
         #print(XX)
         #print(dx(RR, rr, XX))
         if(i % 100 == 0):
-            for i in range(num_layers):
-                out[i].append(XX[i])
+            for j in range(num_layers):
+                out[j].append(XX[j])
+                error += (XX[j] - data[j][round(i/100)])**2
         XX += .01*dx(XX)
     return out
 
@@ -112,7 +114,7 @@ def intode(XX, t):
 #b_string = "." + str(round(b*100))
 #h_string = "." + str(round(mu*100))
 color = ['bo', 'ro', 'bo']
-
+error = 0.0
 
 test = intode(IC, years)
 std = 0.
@@ -120,8 +122,8 @@ std = 0.
 T = np.arange(0, years, 1)
 plt.xlabel("Years")
 plt.ylabel("Fraction of Women")
-plt.ylim(0,1)
-#plt.title(b_string + " bias " + h_string + " homophily")
+#plt.ylim(0,1)
+plt.title(name_string[:(len(name_string)-4)] + "   error = " + str(error))
 for i in range(num_layers):
     plt.plot(T, test[i],label = layer_names[i])
     #plt.plot(T, data[i])

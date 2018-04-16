@@ -142,7 +142,7 @@ for i in range(3):
     heap = heap[:10]
     for i in range(10):
         heap += localSearch(.01, heap[i][0], heap[i][1])
-    heap = heap[10:]
+    print(i)
 
 
 #print(out)

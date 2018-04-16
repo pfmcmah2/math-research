@@ -81,12 +81,10 @@ def dx(RR, rr, XX):
 ### Integration over time t = years/100 ###
 def intodediff(RR, rr, XX, t, data):
     out = 0.0
-    w = 1.0
     for i in range(t*100):
         if(i % 100 == 0):
             for j in range(num_layers):
-                out += w*(XX[j] - data[j][round(i/100)])**2
-            w += 1/num_layers
+                out += (XX[j] - data[j][round(i/100)])**2        
         XX += .01*dx(RR, rr, XX)
     return out
 
