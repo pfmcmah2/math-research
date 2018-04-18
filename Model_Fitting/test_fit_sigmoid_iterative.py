@@ -10,7 +10,7 @@ import csv
 ### layer at each year. This is a brute force method which assumes a normal
 ### homophily with sigma = .3
 
-name_string = 'Academia_Psychology.csv'
+name_string = 'Academia_Engineering.csv'
 directory = 'Data/'
 
 # open file
@@ -140,8 +140,8 @@ for i in range(3):
     res *= .1
     heap.sort()
     heap = heap[:10]
-    for i in range(10):
-        heap += localSearch(.01, heap[i][0], heap[i][1])
+    for j in range(10):
+        heap += localSearch(res, heap[j][0], heap[j][1])
     print(i)
 
 
