@@ -90,13 +90,21 @@ def GetH(t):
     f = X[L] + dx[L]/R[L]              # f(X[L],X[L-1]) = X[L] + dx[L]/R[L]
     u = X[L]
     v = X[L-1]
-    m = f*(1-b)*(1-v)/(b*v*(1-f))
-    # throw out invalid λ's
-    if(m > 0 and abs(v-u) > .01):
-        test = np.log(m)/(v-u)
-        if(test != -math.inf):
-            λ.append(test)
-    fprev = f
+    print(X[L], dx[L])
+    if((X[L] >= 0 and X[L] <= 1) or dx[L] == 0):
+        Rmin = 0
+        Rmax = 1
+    else:
+        if(dx[L] > 0):
+            Rmax = dx[L]/(-X[L])
+            Rmin = dx[L]/(1-X[L])
+        if(dx[L] < 0):
+            Rmin = dx[L]/(-X[L])
+            Rmax = dx[L]/(1-X[L])
+
+    # test for f values!!!
+    λ.append([Rmin, Rmax])
+    '''fprev = f
     for i in range(L-1, -1, -1):
         f = (X[i] + r[i]*fprev + dx[i]/R[i])*(1 + r[i])
         u = X[i]
@@ -105,11 +113,10 @@ def GetH(t):
         else:
             v = .5
         m = f*(1-b)*(1-v)/(b*v*(1-f))
-        if(m > 0 and abs(v-u) > .01):
-            test = np.log(m)/(v-u)
-            if(test != -math.inf):
-                λ.append(test)
-        fprev = f
+
+        # test for f values!!!
+        λ.append(f)
+        fprev = f'''
 
 
 
@@ -118,5 +125,5 @@ for i in range(years - 1):
 
 
 print(λ)
-print(np.std(λ))
+print(max(λ[0]), min(λ[1]))
 print(r)

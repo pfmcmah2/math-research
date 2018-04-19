@@ -65,7 +65,7 @@ for i in range(num_layers):
 
 ### Fraction of women promoted to layer u from layer v ###
 def P(u, v):
-    # sigmoid funciton
+    # sigmoid funciton λ 
     return 1/(1 + 2.71828**(-lam*(u - v)))
 
 def f(u, v):
