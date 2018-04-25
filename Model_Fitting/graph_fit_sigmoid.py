@@ -6,11 +6,11 @@ import csv
 import matplotlib
 
 
-b = .47
-lam = 4.7
+b = .52
+lam = 3.3
 
 
-name_string = 'Academia_Engineering.csv'
+name_string = 'Academia_Psychology.csv'
 directory = 'Data/'
 
 # open file

@@ -10,7 +10,7 @@ import csv
 ### layer at each year. This is a brute force method which assumes a normal
 ### homophily with sigma = .3
 
-name_string = 'Academia_Engineering.csv'
+name_string = 'Academia_Psychology.csv'
 directory = 'Data/'
 
 # open file
@@ -65,7 +65,7 @@ for i in range(num_layers):
 
 ### Fraction of women promoted to layer u from layer v ###
 def P(u, v):
-    # sigmoid funciton λ 
+    # sigmoid funciton λ
     return 1/(1 + 2.71828**(-lam*(u - v)))
 
 def f(u, v):
@@ -106,19 +106,22 @@ lam = 1
 ### more iterations -> higher precision, higher n -> more likely to find true
 ### global min, less likely to fall into local min trap
 
-lam = 4.5
+lam = 2.5
+b_start = .45
+res = .01
+
 for i in range(9):
-    b = .45
+    b = b_start
     for j in range(9):
         # compute error for curren bias and lambda
         temp = intodediff(R,r,IC,years,data)
         if(temp < min_val):
             min_val = temp
             min_param = [b,lam]
-        b += .01
+        b += res
     # used to check progress in terminal, remove for performance
     print(lam, min_val)
-    lam += .1
+    lam += res*10
 
 
 # return minumum error and corresponding parameters

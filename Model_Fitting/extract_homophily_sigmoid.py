@@ -15,7 +15,7 @@ from mpl_toolkits.mplot3d import Axes3D
 ################
 ### Get data ###
 ################
-name_string = 'Academia_Engineering.csv'
+name_string = 'Academia_Psychology.csv'
 directory = 'Data/'
 
 # open file
@@ -91,11 +91,10 @@ def GetH(t):
     u = X[L]
     v = X[L-1]
     m = f*(1-b)*(1-v)/(b*v*(1-f))
-    # throw out invalid λ's
-    if(m > 0 and abs(v-u) > .01):
-        test = np.log(m)/(v-u)
-        if(test != -math.inf):
-            λ.append(test)
+
+    #test = np.log(m)/(v-u)
+    λ.append(m)
+
     fprev = f
     for i in range(L-1, -1, -1):
         f = (X[i] + r[i]*fprev + dx[i]/R[i])*(1 + r[i])
@@ -105,10 +104,10 @@ def GetH(t):
         else:
             v = .5
         m = f*(1-b)*(1-v)/(b*v*(1-f))
-        if(m > 0 and abs(v-u) > .01):
-            test = np.log(m)/(v-u)
-            if(test != -math.inf):
-                λ.append(test)
+
+        #test = np.log(m)/(v-u)
+        λ.append(m)
+
         fprev = f
 
 
@@ -116,7 +115,15 @@ def GetH(t):
 for i in range(years - 1):
     GetH(i)
 
+λ1 = []
+rem = 0
+for i in range(len(λ)):
+    if(λ[i] > 0 and λ[i] < 10000):
+        λ1.append(λ[i])
+    else:
+        rem += 1
 
-print(λ)
-print(np.std(λ))
-print(r)
+
+print(λ1)
+print(np.std(λ1))
+print(rem)

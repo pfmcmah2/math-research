@@ -15,7 +15,7 @@ from mpl_toolkits.mplot3d import Axes3D
 ################
 ### Get data ###
 ################
-name_string = 'Academia_Engineering.csv'
+name_string = 'Academia_Psychology.csv'
 directory = 'Data/'
 
 # open file
