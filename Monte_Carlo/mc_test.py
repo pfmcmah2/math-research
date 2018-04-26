@@ -7,7 +7,7 @@ import random
 ### WARNING!!! The situation in which x people retire from layer y, and there
 #   are <x people in layer y-1 is not "yet" accounted for.
 #   Simple fix is running to full layer promote repeatedly until all layers are full
-#   Or set each layer size >= the sum of all above layer sizes
+
 
 # PERSON CLASS
 #   1 int 1 bool, [years to retirement (yr), Gender (g)]
@@ -34,18 +34,19 @@ import random
 #   Choosing yr for a new person is done randomly, exponential distribution?
 #   Only ratio of layer size matters, larger layers => higher "resolution"
 
-λ = 1   # homophily
-b = .5  # bias
+λ = .5   # homophily
+b = .9  # bias
 
-min_yr = 5  # minimum years to retirement of a new person
-max_yr = 50 # maximum years to retirement of a new person
+min_yr = 1  # minimum years to retirement of a new person
+max_yr = 15 # maximum years to retirement of a new person
 
 num_layers = 2      # number of layers
 L = num_layers - 1  # index of top layer
 Layers = []         # list of LAYERs
-LayerSize = [13,8,5,3,2,1]          # preset layer size
+LayerSize = [130,80,5,3,2,1]          # preset layer size
 IC = [0.4,0.3,0.2,0.1,0.05,0.01]    # initial condition
 numWomen = []       # number of women in each layer, initialized during initialize layers
+
 
 
 ### Homophily Function ###
@@ -53,9 +54,6 @@ def P(u, v):
     # sigmoid funciton λ
     return 1/(1 + 2.71828**(-λ*(u - v)))
 
-### Fraction of women promoted to layer u from layer v ###
-def f(u, v):
-    return b*v*P(u,v)/(b*v*P(u,v) + (1 - b)*(1 - v)*P(1 - u,1 - v))
 
 
 ### CREATE A NEW PERSON ###
@@ -93,7 +91,7 @@ def selectPromote(dest, vacancies):
         # it makes sense to me that they would be looked at first
         # it should also fill higher layer with older people
         for i in range(len(Layers[dest-1])):    # look at all people in lower layer, may not equal layer size
-            if(i in idx): # if the person at i hasn't been promoted
+            if(i not in idx): # if the person at i hasn't been promoted
                 # compute probability of being promoted
                 if(Layers[dest-1][i][1] == 0): # if woman
                     pp = b*homophily
@@ -124,9 +122,9 @@ def nextYear():
     vacancies = []
     for i in range(num_layers):     # for every layer
         women = 0       # number of retiring women
+        count = 0
         retiring = []   # list of indexes of people retiring
         for j in range(len(Layers[i])):   # for every person
-            count = 0
             Layers[i][j][0] -= 1     # decrement yr of this person
             if(Layers[i][j][0] == 0):    # check if at retirment
                 if(Layers[i][j][1] == 0):    # if woman decrease woman count
@@ -134,10 +132,11 @@ def nextYear():
                 retiring.append(j)     # add person to retirment list
                 count += 1
         numWomen[i] += women   # update number of women in layer
-        for j in range(len(retiring)):
+        for j in range(len(retiring)):  # remove retired persons
             del Layers[i][retiring[j]-j]  # retiring[j]-j holds index of person to be removed
         vacancies.append(count)
     return vacancies
+
 
 
 ### FILL VACANCIES ###
@@ -146,6 +145,8 @@ def nextYear():
 # effects:  adds/removes persons to simulate promotion
 #           updates number of women in both layers involved for each promotion
 def fillVacancies(vacancies):
+    global Layers
+    global numWomen
     for i in range(L, 0, -1): # for all layers L down to 1
         promoted = selectPromote(i, vacancies[i])   # get promoted people for layer i
         numWomen[i] += promoted[1]     # add number of women promoted to upper layer
@@ -202,6 +203,18 @@ def initializeLayers(min_yr, max_yr):
 
 
 
+### COMPUTE FRACTION OF WOMEN
+# inputs:   none
+# outputs:  float[num_layers] frac; holds fraction of women at each layer
+# effects:  none
+def computeFraction():
+    frac = []
+    for i in range(num_layers):
+        frac.append(numWomen[i]/LayerSize[i])
+    return frac
+
+
+
 ### PRINT LAYERS ###
 # inputs:   none
 # outputs:  none
@@ -209,21 +222,21 @@ def initializeLayers(min_yr, max_yr):
 # prints layer in top down order
 def printLayers():
     for i in range(num_layers):
-        print(Layers[L-i])
-        print('\n')
-
-
+        print('Layer', L-i, ':', Layers[L-i])
 
 
 
 
 initializeLayers(min_yr, max_yr)
-printLayers()
+#printLayers()
 print(numWomen)
-for i in range(20):
-    nextYear()
-printLayers()
+print(computeFraction())
+for i in range(500):
+    #print(i)
+    vac = nextYear()
+    #print(vac)
+    fillVacancies(vac)
+
+#printLayers()
 print(numWomen)
-initializeLayers(0, 10000)
-printLayers()
-print(numWomen)
+print(computeFraction())
