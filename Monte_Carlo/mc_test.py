@@ -33,14 +33,21 @@ import random
 #   Choosing yr for a new person is done randomly, exponential distribution?
 #   Only ratio of layer size matters, larger layers => higher "resolution"
 
-λ = 1
-b = .5
+λ = 1   # homophily
+b = .5  # bias
+
+min_yr = 5  # minimum years to retirement of a new person
+max_yr = 50 # maximum years to retirement of a new person
 
 num_layers = 2      # number of layers
 L = num_layers - 1  # index of top layer
 Layers = []         # list of LAYERs
 LayerSize = [13,8,5,3,2,1]          # preset layer size
 IC = [0.4,0.3,0.2,0.1,0.05,0.01]    # initial condition
+### TODO: store number of women in each layer in a seperate array, not in layer struct
+###     This removes the need for a layer class as it only needs to be an array of persons
+###     TODO: refactor every function, look for Layers[i][1]
+#numWomen = [0,0,0,0,0,0]
 
 ### Homophily Function ###
 def P(u, v):
@@ -57,10 +64,13 @@ def f(u, v):
 #           int lls;        lower limit for lifeSpan
 #           int uls;        upper limit for lifeSpan
 # outputs:  person struct
+# effects:  none
 def newPerson(gender, lls, uls):
     lifeSpan = random.randint(lls,uls)
     #level = 0
     return [lifeSpan, gender]
+
+
 
 ### choose person to be promoted ###
 # inputs:   int dest;  index of higher layer
@@ -68,6 +78,7 @@ def newPerson(gender, lls, uls):
 # outputs:  int[vacancies] idx;  list of indexes of people to be promoted
 #           int women;  number of women promoted
 #           outputs stored in a tuple
+# effects:  none
 def selectPromote(dest, vacancies):
     # compute likelyhood of a woman to apply
     # Layers[dest][1] holds number of women at layer dest
@@ -109,6 +120,7 @@ def selectPromote(dest, vacancies):
 ### move to next year ###
 # inputs:   none
 # outputs:  int[L] vacancies;    array holding vacancies at each layer
+# effects:  removes people from each layer, updates number of women in each layer
 def nextYear():
     vacancies = []
     for i in range(num_layers):     # for every layer
@@ -129,11 +141,13 @@ def nextYear():
 
 ### fill vacancies ###
 # inputs:   int[L] vacancies;    array holding vacancies at each layer
-# outputs:
+# outputs:  none
+# effects:  adds
 def fillVacancies(vacancies):
     for i in range(L, 0, -1): # for all layers L down to 1
         promoted = selectPromote(i, vacancies[i])   # get promoted people for layer i
-        Layers[i][1] += promoted[1]     # update number of women
+        Layers[i][1] += promoted[1]     # add number of women promoted to upper layer
+        Layers[i-1][1] -= promoted[1]   # subtract number of women promoted out of lower layer
         for j in range(vacancies[i]):   # for each person promoted
             # add person to upper layer, promoted[0][j] is index of person to be promoted
             Layers[i][0].append(Layers[i-1][0][promoted[0][j]])
@@ -141,7 +155,23 @@ def fillVacancies(vacancies):
             del Layers[i-1][0][promoted[0][j]]
         # number of vacancies at lower level is increases do to promotions
         vacancies[i-1] += vacancies[i]
-    ### TODO: fill lower layer
+
+
+    # fill lower layer with new people
+    # number of women in bottom layer is Layers[0][1], fraction of women in entry pool is always .5
+    homophily = P(Layers[0][1]/LayerSize[0], .5)
+    pp = homophily*b    # probability that the new person promoted is a woman
+    women = 0
+    for j in range(vacancies[0]):
+        rand = random.uniform(0, 1)
+        if(pp >= rand): # add new woman
+            Layers[i][0].append(newPerson(0, min_yr, max_yr))
+            women += 1
+        else    # add new man
+            Layers[i][0].append(newPerson(1, min_yr, max_yr))
+    Layers[0][1] += women
+
+
 
 
 
