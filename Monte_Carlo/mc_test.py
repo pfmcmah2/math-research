@@ -58,7 +58,7 @@ def f(u, v):
     return b*v*P(u,v)/(b*v*P(u,v) + (1 - b)*(1 - v)*P(1 - u,1 - v))
 
 
-### create a new person ###
+### CREATE A NEW PERSON ###
 # inputs:   bool Gender;    0 = female, 1 = male
 #           int lls;        lower limit for lifeSpan
 #           int uls;        upper limit for lifeSpan
@@ -71,7 +71,7 @@ def newPerson(gender, lls, uls):
 
 
 
-### choose person to be promoted ###
+### CHOOSE PERSONS TO BE PROMOTED ###
 # inputs:   int dest;  index of higher layer
 #           int vacancies;  number of vacancies
 # outputs:  int[vacancies] idx;  list of indexes of people to be promoted
@@ -116,29 +116,31 @@ def selectPromote(dest, vacancies):
 
 
 
-### move to next year ###
-# inputs:   none
-# outputs:  int[L] vacancies;    array holding vacancies at each layer
+### MOVE TO NEXT YEAR ###
+# inputs:
+# outputs:  int[num_layers] vacancies;  array holding vacancies at each layer
 # effects:  removes people from each layer, updates number of women in each layer
 def nextYear():
     vacancies = []
     for i in range(num_layers):     # for every layer
-        for j in range(LayerSize[i]):   # for every person
-            women = 0       # number of retiring women
+        women = 0       # number of retiring women
+        retiring = []   # list of indexes of people retiring
+        for j in range(len(Layers[i])):   # for every person
             count = 0
             Layers[i][j][0] -= 1     # decrement yr of this person
             if(Layers[i][j][0] == 0):    # check if at retirment
                 if(Layers[i][j][1] == 0):    # if woman decrease woman count
                     women -= 1
-                del Layers[i][j]     # remove person
+                retiring.append(j)     # add person to retirment list
                 count += 1
         numWomen[i] += women   # update number of women in layer
+        for j in range(len(retiring)):
+            del Layers[i][retiring[j]-j]  # retiring[j]-j holds index of person to be removed
         vacancies.append(count)
     return vacancies
 
 
-
-### fill vacancies ###
+### FILL VACANCIES ###
 # inputs:   int[L] vacancies;    array holding vacancies at each layer
 # outputs:  none
 # effects:  adds/removes persons to simulate promotion
@@ -161,7 +163,7 @@ def fillVacancies(vacancies):
     # number of women in bottom layer is Layers[0][1], fraction of women in entry pool is always .5
     homophily = P(numWomen[0]/LayerSize[0], .5)
     pp = homophily*b    # probability that the new person promoted is a woman
-    women = 0
+    women = 0   # number of new women
     for j in range(vacancies[0]):
         rand = random.uniform(0, 1)
         if(pp >= rand): # add new woman
@@ -173,31 +175,55 @@ def fillVacancies(vacancies):
 
 
 
+### INITIALIZE LAYERS ###
+# inputs:   int min_yr, max_yr;     min and max possible years remaining
+# outputs:  none
+# effects:  clears/initializes Layers[]
+#           clears/initializes numWomen
+# NOTE: decrease max_yr as you move to higher levels, TESTING ONLY
+#       need to find a good way to get different yr for each layer
+def initializeLayers(min_yr, max_yr):
+    global Layers
+    global numWomen
+    Layers = [] # clear Layers
+    numWomen = []
+    for i in range(num_layers): # for all layers
+        Layers.append([])   # initialize list structure
+        women = 0   # keeps count of number of women
+        for j in range(LayerSize[i]):   # fill current layer
+            rand = random.uniform(0, 1) # should produce fraction of women consistent with IC
+            if(IC[i] >= rand):  # add woman
+                Layers[i].append(newPerson(0, min_yr, max_yr))
+                women += 1
+            else:   # add man
+                Layers[i].append(newPerson(1, min_yr, max_yr))
+        numWomen.append(women)   # set fraction of women
+        max_yr -= 10 # temporary
 
 
-### INITIALIZE LAYERS, make this a funciton in the future?
-# decrease max_yr as you move to higher levels, TESTING ONLY
-min_yr = 5
-max_yr = 50
 
-for i in range(num_layers): # for all layers
-    Layers.append([])   # initialize list structure
-    for j in range(LayerSize[i]):   # fill current layer
-        women = 0
-        rand = random.uniform(0, 1) # should produce fraction of women consistent with IC
-        if(IC[i] >= rand):  # add woman
-            Layers[i].append(newPerson(0, min_yr, max_yr))
-            women += 1
-        else:   # add man
-            Layers[i].append(newPerson(1, min_yr, max_yr))
-    numWomen.append(women)   # set fraction of women
-    max_yr -= 10 # temporary
+### PRINT LAYERS ###
+# inputs:   none
+# outputs:  none
+# effects:  none
+# prints layer in top down order
+def printLayers():
+    for i in range(num_layers):
+        print(Layers[L-i])
+        print('\n')
 
 
 
 
-'''test = 0
-for i in range(1000):
-    if(random.uniform(0, 1) < .6):
-        test += 1
-print(test)'''
+
+
+initializeLayers(min_yr, max_yr)
+printLayers()
+print(numWomen)
+for i in range(20):
+    nextYear()
+printLayers()
+print(numWomen)
+initializeLayers(0, 10000)
+printLayers()
+print(numWomen)
