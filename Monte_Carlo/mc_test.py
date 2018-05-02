@@ -34,16 +34,17 @@ import random
 #   Choosing yr for a new person is done randomly, exponential distribution?
 #   Only ratio of layer size matters, larger layers => higher "resolution"
 
-λ = .5   # homophily
-b = .9  # bias
+λ = .1   # homophily
+b = .7  # bias
 
 min_yr = 1  # minimum years to retirement of a new person
-max_yr = 15 # maximum years to retirement of a new person
+max_yr = 50 # maximum years to retirement of a new person
 
-num_layers = 2      # number of layers
+num_layers = 6      # number of layers
 L = num_layers - 1  # index of top layer
 Layers = []         # list of LAYERs
-LayerSize = [130,80,5,3,2,1]          # preset layer size
+#LayerSize = [130,80,50,3,2,1]          # preset layer size
+LayerSize = [512,128,32,8,2,1]
 IC = [0.4,0.3,0.2,0.1,0.05,0.01]    # initial condition
 numWomen = []       # number of women in each layer, initialized during initialize layers
 
@@ -53,6 +54,8 @@ numWomen = []       # number of women in each layer, initialized during initiali
 def P(u, v):
     # sigmoid funciton λ
     return 1/(1 + 2.71828**(-λ*(u - v)))
+    # constant
+    #return .5
 
 
 
@@ -199,7 +202,7 @@ def initializeLayers(min_yr, max_yr):
             else:   # add man
                 Layers[i].append(newPerson(1, min_yr, max_yr))
         numWomen.append(women)   # set fraction of women
-        max_yr -= 10 # temporary
+        max_yr -= 5 # temporary
 
 
 
@@ -236,6 +239,8 @@ for i in range(500):
     vac = nextYear()
     #print(vac)
     fillVacancies(vac)
+    if(i%100 == 0):
+        print(i)
 
 #printLayers()
 print(numWomen)
