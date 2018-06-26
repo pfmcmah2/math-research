@@ -22,7 +22,7 @@ layer_names = ['undergrad','grad','postdoc','tenure track','tenured','full']
 
 b = .5    # Bias, <.5 -> favors men, >.5 -> favors women
 sigma = .3  # STD for gaussian homophily distribution
-lam = 10
+lam = 5
 
 sigma2 = sigma**2
 sqt = np.sqrt(6.28318*sigma2)
