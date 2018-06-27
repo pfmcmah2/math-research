@@ -4,11 +4,6 @@ import math
 import scipy.stats
 import random
 
-### WARNING!!! The situation in which x people retire from layer y, and there
-#   are <x people in layer y-1 is not "yet" accounted for.
-#   Simple fix is running to full layer promote repeatedly until all layers are full
-
-
 # PERSON CLASS
 #   1 int 1 bool, [years to retirement (yr), Gender (g)]
 #   example: Person12 = [17, man]
@@ -35,7 +30,7 @@ import random
 #   Only ratio of layer size matters, larger layers => higher "resolution"
 
 λ = .1   # homophily
-b = .7  # bias
+b = .5  # bias
 
 min_yr = 1  # minimum years to retirement of a new person
 max_yr = 50 # maximum years to retirement of a new person
@@ -47,6 +42,7 @@ Layers = []         # list of LAYERs
 LayerSize = [512,128,32,8,2,1]
 IC = [0.4,0.3,0.2,0.1,0.05,0.01]    # initial condition
 numWomen = []       # number of women in each layer, initialized during initialize layers
+vacancies = []      # global vacancies list
 
 
 
@@ -108,12 +104,14 @@ def selectPromote(dest, vacancies):
                     count += 1
                     if(Layers[dest-1][i][1] == 0):   # if woman
                         women += 1
+        if(count == len(Layers[dest-1])): # if everyone from lower layer is promoted
+            break;
 
     idx.sort()      # sort idx
     for i in range(len(idx)):
         idx[i] -= i # adjust indexes to accommodate for removal of earlier elements
 
-    return [idx, women]
+    return [idx, women, count]
 
 
 
@@ -122,6 +120,8 @@ def selectPromote(dest, vacancies):
 # outputs:  int[num_layers] vacancies;  array holding vacancies at each layer
 # effects:  removes people from each layer, updates number of women in each layer
 def nextYear():
+    global vacancies
+
     vacancies = []
     for i in range(num_layers):     # for every layer
         women = 0       # number of retiring women
@@ -138,7 +138,6 @@ def nextYear():
         for j in range(len(retiring)):  # remove retired persons
             del Layers[i][retiring[j]-j]  # retiring[j]-j holds index of person to be removed
         vacancies.append(count)
-    return vacancies
 
 
 
@@ -147,20 +146,23 @@ def nextYear():
 # outputs:  none
 # effects:  adds/removes persons to simulate promotion
 #           updates number of women in both layers involved for each promotion
-def fillVacancies(vacancies):
+def fillVacancies():
     global Layers
     global numWomen
+    global vacancies
     for i in range(L, 0, -1): # for all layers L down to 1
         promoted = selectPromote(i, vacancies[i])   # get promoted people for layer i
         numWomen[i] += promoted[1]     # add number of women promoted to upper layer
         numWomen[i-1] -= promoted[1]   # subtract number of women promoted out of lower layer
-        for j in range(vacancies[i]):   # for each person promoted
+        for j in range(promoted[2]):   # for each person promoted
             # add person to upper layer, promoted[0][j] is index of person to be promoted
             Layers[i].append(Layers[i-1][promoted[0][j]])
             # remove person from lower layer
             del Layers[i-1][promoted[0][j]]
         # number of vacancies at lower level is increases do to promotions
-        vacancies[i-1] += vacancies[i]
+        vacancies[i] -= promoted[2]    # update number of vacancies
+        vacancies[i-1] += promoted[2]
+
 
 
     # fill lower layer with new people
@@ -175,8 +177,14 @@ def fillVacancies(vacancies):
             women += 1
         else:   # add new man
             Layers[0].append(newPerson(1, min_yr, max_yr))
+    vacancies[0] = 0
     numWomen[0] += women
 
+    done = True
+    for i in range(num_layers):
+        if(vacancies[i] != 0):
+            done = False
+    return done
 
 
 ### INITIALIZE LAYERS ###
@@ -236,9 +244,11 @@ print(numWomen)
 print(computeFraction())
 for i in range(500):
     #print(i)
-    vac = nextYear()
+    nextYear()
     #print(vac)
-    fillVacancies(vac)
+    filled = False
+    while(not(filled)):
+        filled = fillVacancies()
     if(i%100 == 0):
         print(i)
 
