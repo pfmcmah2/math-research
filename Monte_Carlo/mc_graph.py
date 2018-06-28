@@ -4,9 +4,6 @@ import math
 import scipy.stats
 import random
 
-
-### TODO: Track years at company for each person?
-
 # PERSON CLASS
 #   1 int 1 bool, [years to retirement (yr), Gender (g)]
 #   example: Person12 = [17, man]
@@ -32,8 +29,10 @@ import random
 #   Choosing yr for a new person is done randomly, exponential distribution?
 #   Only ratio of layer size matters, larger layers => higher "resolution"
 
-λ = .5   # homophily
+λ = 1   # homophily
 b = .9  # bias
+mu = .5
+sigma = .3
 
 min_yr = 1  # minimum years to retirement of a new person
 max_yr = 50 # maximum years to retirement of a new person
@@ -41,9 +40,12 @@ max_yr = 50 # maximum years to retirement of a new person
 num_layers = 6      # number of layers
 L = num_layers - 1  # index of top layer
 Layers = []         # list of LAYERs
+
+layer_names = ['undergrad','grad','postdoc','tenure track','tenured','full']
 #LayerSize = [130,80,50,3,2,1]          # preset layer size
-LayerSize = [5120,1280,320,80,20,10]
-IC = [1.0,0.3,0.2,0.1,0.05,0.01]    # initial condition
+LayerSize = [13,8,5,3,2,1]
+IC = [0.4,0.3,0.2,0.1,0.05,0.01]    # initial condition
+#IC = [0.6,0.7,0.8,0.9,0.95,0.99]
 numWomen = []       # number of women in each layer, initialized during initialize layers
 vacancies = []      # global vacancies list
 
@@ -53,6 +55,8 @@ vacancies = []      # global vacancies list
 def P(u, v):
     # sigmoid funciton λ
     return 1/(1 + 2.71828**(-λ*(u - v)))
+    # normal distribution
+    #return scipy.stats.norm(mu, sigma).pdf(u)
     # constant
     #return .5
 
@@ -87,7 +91,7 @@ def selectPromote(dest, vacancies):
     count = 0   # number of people selected to be promoted
     idx = []    # indexes of people to be promoted
     # loop until enough people have been found
-    while(count < vacancies):
+    while(count < vacancies and count < len(Layers[dest-1])):
         # look at everyone in lower layer
         # people in the front of the list have been in the layer longest
         # it makes sense to me that they would be looked at first
@@ -107,8 +111,6 @@ def selectPromote(dest, vacancies):
                     count += 1
                     if(Layers[dest-1][i][1] == 0):   # if woman
                         women += 1
-        if(count == len(Layers[dest-1])): # if everyone from lower layer is promoted
-            break;
 
     idx.sort()      # sort idx
     for i in range(len(idx)):
@@ -242,21 +244,36 @@ def printLayers():
 
 ### MAIN
 
+years = 500     # simulation length
+period = 5      # sampling period for graphing data
+resolution = 100  # factor by which layer size is multiplied
+for i in range(num_layers):
+    LayerSize[i] = LayerSize[i] * resolution
+
 initializeLayers(min_yr, max_yr)
-#printLayers()
+graphData = []
 print(numWomen)
 print(computeFraction())
+graphData.append(computeFraction())
 for i in range(500):
-    #print(i)
     nextYear()
-    #print(vac)
     filled = False
     while(not(filled)):
         filled = fillVacancies()
+    #graphData.append(computeFraction())
+    if(i%period == 0):
+        graphData.append(computeFraction())
     if(i%100 == 0):
         print(i)
-        print(computeFraction())
 
-#printLayers()
-print(numWomen)
-print(computeFraction())
+graphData = np.transpose(graphData)
+
+T = np.arange(0, len(graphData[0]), 1)
+plt.xlabel("Years")
+plt.ylabel("Fraction of Women")
+plt.ylim(0,1)
+#plt.title(b_string + " bias " + h_string + " homophily")
+for i in range(num_layers):
+    plt.plot(T, graphData[i], label = layer_names[i])
+plt.legend()
+plt.show()
