@@ -99,6 +99,9 @@ def selectPromote(dest, vacancies):
                     pp = b*homophily
                 else: # if man
                     pp = (1-b)*(1-homophily)
+                # changed probability weight
+                # TODO: look at this
+                pp = 2* pp / len(Layers[dest-1])
                 # determine if the person should be promoted
                 rand = random.uniform(0, 1) # generate random float from uniform distribution
                 # Give a person a (100*pp)% chance of getting promoted
