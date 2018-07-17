@@ -85,7 +85,8 @@ def newPerson(gender, lls, uls):
 def selectPromote(dest, vacancies):
     # compute likelyhood of a woman to apply
     # numWomen[dest] holds number of women at layer dest
-    homophily = P(numWomen[dest]/LayerSize[dest], numWomen[dest-1]/LayerSize[dest-1])
+    homophilyW = P(numWomen[dest]/LayerSize[dest], numWomen[dest-1]/LayerSize[dest-1])
+    homophilyM = P((LayerSize[dest]-numWomen[dest])/LayerSize[dest], (LayerSize[dest-1]-numWomen[dest-1])/LayerSize[dest-1])
 
     women = 0   # number of women selected to be promoted
     count = 0   # number of people selected to be promoted
@@ -100,9 +101,9 @@ def selectPromote(dest, vacancies):
             if(i not in idx): # if the person at i hasn't been promoted
                 # compute probability of being promoted
                 if(Layers[dest-1][i][1] == 0): # if woman
-                    pp = b*homophily
+                    pp = b*homophilyW
                 else: # if man
-                    pp = (1-b)*(1-homophily)
+                    pp = (1-b)*homophilyM
                 # determine if the person should be promoted
                 rand = random.uniform(0, 1) # generate random float from uniform distribution
                 # Give a person a (100*pp)% chance of getting promoted
