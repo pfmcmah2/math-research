@@ -32,8 +32,9 @@ import random
 #   Choosing yr for a new person is done randomly, exponential distribution?
 #   Only ratio of layer size matters, larger layers => higher "resolution"
 
-λ = .5   # homophily
-b = .9  # bias
+λ = 1          # homophily
+b = .6          # bias
+runTime = 1000  # years of simulation should be multiple of 100
 
 min_yr = 1  # minimum years to retirement of a new person
 max_yr = 50 # maximum years to retirement of a new person
@@ -43,7 +44,7 @@ L = num_layers - 1  # index of top layer
 Layers = []         # list of LAYERs
 #LayerSize = [130,80,50,3,2,1]          # preset layer size
 LayerSize = [5120,1280,320,80,20,10]
-IC = [1.0,0.3,0.2,0.1,0.05,0.01]    # initial condition
+IC = [0.4,0.3,0.2,0.1,0.05,0.01]    # initial condition
 numWomen = []       # number of women in each layer, initialized during initialize layers
 vacancies = []      # global vacancies list
 
@@ -84,38 +85,38 @@ def selectPromote(dest, vacancies):
     # compute relative probability that a woman/man is promoted
     u = numWomen[dest-1]/LayerSize[dest-1]
     v = numWomen[dest]/LayerSize[dest]
-    ppW = 
-    ppM =
+    ppW = b*P(u,v)
+    ppM = (1-b)*P(1-u,1-v)
+    rank = []
 
     # TODO: figure out how to ramdomly choose about f*layerSize women and
     # (1-f)*layerSize men
 
+    for i in range(len(Layers[dest-1])):    # look at all people in lower layer, may not equal layer size
+            # generate promotion number from uniform distribution random
+            if(Layers[dest-1][i][1] == 0):   # if woman
+                rand = random.uniform(0, ppM)   # should be ppM, not a typo
+            else:
+                rand = random.uniform(0, ppW)
+            rank.append([rand, i])  # store promotion number and index
+
+    # rank people by promotion number and promote those with the lowest number
+    # not sure why this works but tested it in random_test.py, more explanation there
+    # This gives no priority based on seniority
+    # expected fraction of women promoted is f = u*ppW/(u*ppW + (1-u)*ppM)
+    # f = u*b*P(u,v)/(u*b*P(u,v) + (1-u)*(1-b)*P(1-u,1-v)), consistent with og model
+    rank.sort()
     women = 0   # number of women selected to be promoted
     count = 0   # number of people selected to be promoted
     idx = []    # indexes of people to be promoted
-    # loop until enough people have been found
-    while(count < vacancies):
-        # look at everyone in lower layer
-        # people in the front of the list have been in the layer longest
-        # it makes sense to me that they would be looked at first
-        # it should also fill higher layer with older people
-        for i in range(len(Layers[dest-1])):    # look at all people in lower layer, may not equal layer size
-            if(i not in idx): # if the person at i hasn't been promoted
-                # compute probability of being promoted
-                if(Layers[dest-1][i][1] == 0): # if woman
-                    pp = b*homophilyW
-                else: # if man
-                    pp = (1-b)*homophilyM
-                # determine if the person should be promoted
-                rand = random.uniform(0, 1) # generate random float from uniform distribution
-                # Give a person a (100*pp)% chance of getting promoted
-                if(pp > rand and count < vacancies): # promoted as long as there are still spots
-                    idx.append(i)
-                    count += 1
-                    if(Layers[dest-1][i][1] == 0):   # if woman
-                        women += 1
-        if(count == len(Layers[dest-1])): # if everyone from lower layer is promoted
-            break;
+    i = 0
+    while(i < vacancies and i < len(rank)): # look at people with best promotion numbers
+        idx.append(rank[i][1]) # store index of person to be promoted
+        count += 1
+        if(Layers[dest-1][rank[i][1]][1] == 0): # if woman
+            women += 1
+        i += 1
+
 
     idx.sort()      # sort idx
     for i in range(len(idx)):
@@ -253,7 +254,7 @@ initializeLayers(min_yr, max_yr)
 #printLayers()
 print(numWomen)
 print(computeFraction())
-for i in range(500):
+for i in range(runTime):
     #print(i)
     nextYear()
     #print(vac)
